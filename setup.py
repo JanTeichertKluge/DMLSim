@@ -1,7 +1,7 @@
 from setuptools import find_packages, setup
 setup(
-    name='dmlStudy',
-    packages=find_packages(where='C:/Users/Nutzer/source/repos/doubleml-neuralnets/simulation/dml_simulation_study'),
+    name='DMLSim',
+    packages=find_packages(),
     version='0.1.0',
     description='package to run DoubleML simulation studies',
     author='Sundermann, Moritz; Teichert-Kluge, Jan',
