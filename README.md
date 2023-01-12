@@ -29,7 +29,7 @@ Simulation studies with Double / debiased machine learning for
 - tqdm
 - etc.
 
-To install DoubleML with pip use
+To install DMLSim use
 
 ```
 pip install git+https://github.com/JanTeichertKluge/DMLSim.git
