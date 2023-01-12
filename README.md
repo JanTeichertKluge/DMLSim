@@ -54,7 +54,7 @@ from doubleml import DoubleMLIRM
 
 from dml_sim.simulation_base_class import simulation_study as ssession # import simulation session object
 from dml_sim.datasets import make_irm_farell2021 # import a data generating process
-from dml_nn import network_builder # import network builder to build torch networks wrapped in sklearn syntax using skorch
+from dml_nn.simulation_learner import network_builder # import network builder to build torch networks wrapped in sklearn syntax using skorch
 
 builder = network_builder() #Init builder with default settings
 builder.__dict__ #Show default settings
