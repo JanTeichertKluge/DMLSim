@@ -22,6 +22,7 @@ The callable should return numpy arrays:
 - y, dim(y) = (n_obs,)
 - d, dim(d) = (n_obs,)
 - and theta, dim(theta) = (n_obs,) in order to calculate the average treatment effect if the treatment effect is heterogenous.
+
 In some cases, the DGP (doubleml.datasets.make_irm_data for example) generates a heterogenous from an argument with fixed value for theta. Initialize your instance with alpha choosen as None.
 
 ## Installation
