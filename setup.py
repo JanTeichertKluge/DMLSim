@@ -16,7 +16,7 @@ setup(
                       'openpyxl',
                       'pandas',
                       'patsy',
-                      'pexpect,
+                      'pexpect',
                       'Pillow',
                       'platformdirs',
                       'pluggy',
