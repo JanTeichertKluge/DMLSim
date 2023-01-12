@@ -1,14 +1,16 @@
 # DMLSim - Simulation studies for Double Machine Learning in Python
 
-The Python package **DMLSim** provides a simulation study framework using **DoubleML**s Implementation of the double / debiased machine learning framework of
-[Chernozhukov et al. (2018)](https://doi.org/10.1111/ectj.12097).
+The Python package **DMLSim** provides a simulation study framework using [DoubleML](https://github.com/DoubleML/doubleml-for-py)s Implementation of the double / debiased machine learning framework of
+[(Chernozhukov et al. (2018))](https://doi.org/10.1111/ectj.12097).
 
 ## Main Features
 
-Simulation studies with Double / debiased machine learning [(Chernozhukov et al. (2018))](https://doi.org/10.1111/ectj.12097) for 
+Simulation studies with Double / debiased machine learning for 
 
 - Partially linear regression models (PLR)
 - Interactive regression models (IRM)
+
+
 
 ## Installation
 
@@ -61,7 +63,7 @@ learner_dict_irm_ml = {
         }
 
 np_dict = {'n_obs': [500], 'dim_x': [10, 20]}
-scenario_A = session(model = DoubleMLIRM, 
+scenario_A = ssession(model = DoubleMLIRM, 
                     score = 'ATE',
                     DGP = make_irm_farell2021, 
                     n_rep = 100,
