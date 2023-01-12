@@ -86,7 +86,7 @@ scenario_A = ssession(model = DoubleMLIRM,
                     score = 'ATE',
                     DGP = make_irm_farell2021, 
                     n_rep = 100,
-                    np_dict =  np_dict_nn, 
+                    np_dict =  np_dict, 
                     lrn_dict = learner_dict_irm, 
                     alpha = None,
                     is_heterogenous=True)
@@ -103,6 +103,6 @@ scenario_A.histplot()
 # Measure performances
 scenario_A.measure_performance()
 
-# Save measures and plots to [NEW_FOLDER]
-scenario_A.save([path/to/local/NEW_FOLDER])
+# Save measures and plots to NEW_FOLDER
+scenario_A.save('/content/NEW_FOLDER')
 ```
