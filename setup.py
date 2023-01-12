@@ -33,6 +33,6 @@ setup(
                       'torch==1.13.1',
                       'tqdm',
                       'trove-classifiers',
-                      'typing_extensions']
+                      'typing_extensions'],
      license='MIT'
 )
