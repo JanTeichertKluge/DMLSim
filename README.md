@@ -41,7 +41,7 @@ pip install git+https://github.com/JanTeichertKluge/DMLSim.git
 
 
 Example Code for DMLSim:
-```
+```python
 # Make imports
 from sklearn.base import clone
 from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
