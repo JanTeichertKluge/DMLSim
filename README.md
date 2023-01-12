@@ -1,7 +1,7 @@
 # DMLSim - Simulation studies for Double Machine Learning in Python
 
 The Python package **DMLSim** provides a simulation study framework using [DoubleML](https://github.com/DoubleML/doubleml-for-py)s Implementation of the double / debiased machine learning framework of
-[(Chernozhukov et al. (2018))](https://doi.org/10.1111/ectj.12097).
+[Chernozhukov et al. (2018)](https://doi.org/10.1111/ectj.12097).
 
 ## Main Features
 
