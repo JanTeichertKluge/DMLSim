@@ -260,6 +260,7 @@ class simulation_study:
       self.theta_0[setting] = list()
       for _ in range(self.n_rep):
         (x, y, d, treatment_eff) = self.DGP(**DGP_kwargs)
+        self._data.append((x, y, d))
         self.theta_0[setting].append(np.mean(treatment_eff))
 
   def _create_dml_data_obj(self):
