@@ -20,7 +20,6 @@ except ModuleNotFoundError as e:
     sys.exit('Could not import NeuralNetRegressorDoubleML API.')
 
 # Define Classes for Neural Network Models
-torch.manual_seed(0)
 
 # Regressor
 class RegressorModel(nn.Module):
@@ -139,7 +138,8 @@ class network_builder:
         self.batch_size = batch_size
         self.n_epochs = n_epochs
         self.early_stopping = early_stopping
-
+        
+        torch.manual_seed(1234)
 
     # Method to build Neural Network models
     def _prepare_neural_networks(self):
