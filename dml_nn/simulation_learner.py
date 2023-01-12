@@ -13,9 +13,9 @@ from skorch.callbacks import EarlyStopping
 import sys
 
 try:
-    from doubleml_skorch_api import NeuralNetRegressorDoubleML
+    from .doubleml_skorch_api import NeuralNetRegressorDoubleML
     #sys.path.append(r'C:\Users\Nutzer\source\repos\doubleml-neuralnets\API\torch_api')
-except OSError as e:
+except ModuleNotFoundError as e:
     print(e)
     sys.exit('Could not import NeuralNetRegressorDoubleML API.')
 
