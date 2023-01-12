@@ -5,7 +5,7 @@ setup(
     version='0.1.0',
     description='package to run DoubleML simulation studies',
     author='Sundermann, Moritz; Teichert-Kluge, Jan',
-    install_requires=['distlib,
+    install_requires=['distlib',
                       'DoubleML',
                       'fonttools',
                       'joblib',
