@@ -10,7 +10,10 @@ Simulation studies with Double / debiased machine learning for
 - Partially linear regression models (PLR)
 - Interactive regression models (IRM)
 
-
+Instances of the main class 'simulation_stdy' can be used with all learners from sklearn. 
+The learners need a fit() and a predict() method.
+The module 'dml_nn' can be used to create a dictionary with the corresponding models. 
+You are able to pass layer- and hyper-parameters when initializing the class 'simulation_learner'.
 
 ## Installation
 
