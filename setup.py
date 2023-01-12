@@ -2,6 +2,7 @@ from setuptools import find_packages, setup
 setup(
     name='DMLSim',
     packages=find_packages(),
+    py_modules=['datasets', 'doubleml_skorch_api', 'simulation_base_class']
     version='0.1.0',
     description='package to run DoubleML simulation studies',
     author='Sundermann, Moritz; Teichert-Kluge, Jan',
