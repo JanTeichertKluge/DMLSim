@@ -24,15 +24,16 @@ def make_irm_friedman(n_obs=500, dim_x=20, alpha=None, return_type='DoubleMLData
     Computing 4.2, pp. 291–301. doi: 10.1137/0904023. 
     
     
-    Friedman, Jerome H. (Mar. 1991). “Multivariate Adaptive Regression Splines”. In: The
+    Friedman, Jerome H. (1991). “Multivariate Adaptive Regression Splines”. In: The
     Annals of Statistics 19.1. Publisher: Institute of Mathematical Statistics, pp. 1–67. doi:
-    10.1214/aos/1176347963. url: https://projecteuclid.org/journals/annals-of-
-    statistics/volume-19/issue-1/Multivariate-Adaptive-Regression-Splines/
-    10.1214/aos/1176347963.full 
+    10.1214/aos/1176347963.
     
     
+    Parikh, Harsh et al. (June 2022). “Validating Causal Inference Methods”. In: Proceedings
+    of the 39th International Conference on Machine Learning. ISSN: 2640-3498. PMLR,
+    pp. 17346–17358. url: https://proceedings.mlr.press/v162/parikh22a.html
     
-    Parikh et al. 2022; Chipman, George, and McCulloch 2010.
+  
     
     
     
@@ -76,6 +77,8 @@ def make_plr_fingerhut2018(n_obs=500, dim_x=20, theta=1, return_type='DoubleMLDa
     References: Fingerhut, Nitai, Matteo Sesia, and Yaniv Romano (June 2022). "Coordinated Dou-
     ble Machine Learning".  doi: 10.48550/arXiv.2206.00885. 
     
+    Code for data generation avialable online.
+    Link to GitHub Repository: https://github.com/nitaifingerhut/C-DML/tree/9855dd8c7f6fcff0b082822f0d9dd355573715a7
     
     """
     rrho = kwargs.get('rho', 0.8)
@@ -132,6 +135,7 @@ def make_irm_farell2021(n_obs=500, dim_x=20, alpha=None, return_type='DoubleMLDa
     References: Farrell, Max H., Tengyuan Liang, and Sanjog Misra (2021). “Deep Neural Networks for Esti-
     mation and Inference”. en. In: Econometrica 89.1. doi: 10.3982/ECTA16901. 
   
+    Code for data generation avialable online.
    
     """
     x = np.random.uniform(0, 1, (n_obs, dim_x))
