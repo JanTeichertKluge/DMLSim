@@ -11,30 +11,31 @@ _data_frame_alias = ['DataFrame', 'pd.DataFrame', pd.DataFrame]
 _dml_data_alias = ['DoubleMLData', DoubleMLData]
 
 def make_irm_friedman(n_obs=500, dim_x=20, alpha=None, return_type='DoubleMLData', **kwargs):
-    """
-    Args:
-    
-    Generating data from a five dimensional test function
-    which was proposed to assess predictive performance of
-    methods and then extended to evaluate causal inference
+    """  
+    Generating data from a five dimensional test function which was proposed to assess 
+    predictive performance of methods and then extended to evaluate causal inference 
     methods for some highly non-linear outcome (Parikh et al. 2022)
     
     References: Friedman, Jerome H., Eric Grosse, and Werner Stuetzle (June 1983). “Multidimensional
-    Additive Spline Approximation”. In: SIAM Journal on Scientific and Statistical
-    Computing 4.2, pp. 291–301. doi: 10.1137/0904023. 
+                Additive Spline Approximation”. In: SIAM Journal on Scientific and Statistical
+                Computing 4.2, pp. 291–301. doi: 10.1137/0904023. 
+         
+    
+                Friedman, Jerome H. (1991). “Multivariate Adaptive Regression Splines”. In: The
+                Annals of Statistics 19.1. Publisher: Institute of Mathematical Statistics, pp. 1–67. doi:
+                10.1214/aos/1176347963.
     
     
-    Friedman, Jerome H. (1991). “Multivariate Adaptive Regression Splines”. In: The
-    Annals of Statistics 19.1. Publisher: Institute of Mathematical Statistics, pp. 1–67. doi:
-    10.1214/aos/1176347963.
+                Parikh, Harsh et al. (June 2022). “Validating Causal Inference Methods”. In: Proceedings
+                of the 39th International Conference on Machine Learning. ISSN: 2640-3498. PMLR,
+                pp. 17346–17358. url: https://proceedings.mlr.press/v162/parikh22a.html
     
-    
-    Parikh, Harsh et al. (June 2022). “Validating Causal Inference Methods”. In: Proceedings
-    of the 39th International Conference on Machine Learning. ISSN: 2640-3498. PMLR,
-    pp. 17346–17358. url: https://proceedings.mlr.press/v162/parikh22a.html
-    
-  
-    
+    Arguments
+    ----------
+        n_obs:
+        dim_x:
+        alpha:
+        return_type:
     
     
     """
@@ -69,9 +70,6 @@ from operator import mul
 
 def make_plr_fingerhut2018(n_obs=500, dim_x=20, theta=1, return_type='DoubleMLData', **kwargs):
     """
-    
-    Args:
-    
     Generating data from a PLR model as used in Fingerhut, Sesia, and Romano 2022.
     
     References: Fingerhut, Nitai, Matteo Sesia, and Yaniv Romano (June 2022). "Coordinated Dou-
@@ -79,6 +77,16 @@ def make_plr_fingerhut2018(n_obs=500, dim_x=20, theta=1, return_type='DoubleMLDa
     
     Code for data generation avialable online.
     Link to GitHub Repository: https://github.com/nitaifingerhut/C-DML/tree/9855dd8c7f6fcff0b082822f0d9dd355573715a7
+    
+    
+    Arguments
+    ----------
+        n_obs:
+        dim_x:
+        theta:
+        return_type
+        
+    
     
     """
     rrho = kwargs.get('rho', 0.8)
@@ -127,8 +135,6 @@ def make_plr_fingerhut2018(n_obs=500, dim_x=20, theta=1, return_type='DoubleMLDa
 
 def make_irm_farell2021(n_obs=500, dim_x=20, alpha=None, return_type='DoubleMLData', **kwargs):
     """
-    Args:
-    
     Generating data based on a non-linear model for treatment assignment dependent on the covariates as used
     in Farrell, Liang, and Misra 2021.
    
@@ -136,6 +142,13 @@ def make_irm_farell2021(n_obs=500, dim_x=20, alpha=None, return_type='DoubleMLDa
     mation and Inference”. en. In: Econometrica 89.1. doi: 10.3982/ECTA16901. 
   
     Code for data generation avialable online.
+   
+    Arguments
+    ----------
+        n_obs:
+        dim_x:
+        alpha:
+        return_type:
    
     """
     x = np.random.uniform(0, 1, (n_obs, dim_x))
