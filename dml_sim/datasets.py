@@ -12,7 +12,22 @@ _dml_data_alias = ['DoubleMLData', DoubleMLData]
 
 def make_irm_friedman(n_obs=500, dim_x=20, alpha=None, return_type='DoubleMLData', **kwargs):
     """
-    add comments
+    Args:
+    
+    Generating data from a five dimensional test function
+    which was proposed to assess predictive performance of
+    methods and then extended to evaluate causal inference
+    methods for some highly non-linear outcome (Parikh et al. 2022)
+    
+    References: Friedman, Jerome H., Eric Grosse, and Werner Stuetzle (June 1983). “Multidimensional
+    Additive Spline Approximation”. In: SIAM Journal on Scientific and Statistical
+    Computing 4.2, pp. 291–301. doi: 10.1137/0904023. 
+    
+    
+    Friedman 1991; Parikh et al. 2022; Chipman, George, and McCulloch 2010.
+    
+    
+    
     """
     x = np.random.uniform(0, 1, (n_obs, dim_x))
     px = expit(x[:, 0] + x[:, 1] - 0.5)
@@ -45,7 +60,15 @@ from operator import mul
 
 def make_plr_fingerhut2018(n_obs=500, dim_x=20, theta=1, return_type='DoubleMLData', **kwargs):
     """
-    add comments
+    
+    Args:
+    
+    Generating data from a PLR model as used in Fingerhut, Sesia, and Romano 2022.
+    
+    References: Fingerhut, Nitai, Matteo Sesia, and Yaniv Romano (June 2022). "Coordinated Dou-
+    ble Machine Learning".  doi: 10.48550/arXiv.2206.00885. 
+    
+    
     """
     rrho = kwargs.get('rho', 0.8)
     majority_s = kwargs.get('majority_s', 0.75)
@@ -93,7 +116,15 @@ def make_plr_fingerhut2018(n_obs=500, dim_x=20, theta=1, return_type='DoubleMLDa
 
 def make_irm_farell2021(n_obs=500, dim_x=20, alpha=None, return_type='DoubleMLData', **kwargs):
     """
-    add comments
+    Args:
+    
+    Generating data based on a non-linear model for treatment assignment dependent on the covariates as used
+    in Farrell, Liang, and Misra 2021.
+   
+    References: Farrell, Max H., Tengyuan Liang, and Sanjog Misra (2021). “Deep Neural Networks for Esti-
+    mation and Inference”. en. In: Econometrica 89.1. doi: 10.3982/ECTA16901. 
+  
+   
     """
     x = np.random.uniform(0, 1, (n_obs, dim_x))
     px = expit(x[:, 0] + x[:, 1] - 0.5)
