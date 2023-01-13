@@ -49,7 +49,7 @@ pip install git+https://github.com/JanTeichertKluge/DMLSim.git
 ```
 
 ## Usage
-- [Find an example for PLR in Colab](https://colab.research.google.com/drive/1olVJ20onhYEpwWqAbXXmCr83u0JPRAjl?usp=sharing)
+- [Find an example for PLR in Colab](https://colab.research.google.com/drive/1UT1cSmyz-c8ASKeLavoDv8yoe2wxwnaf?usp=sharing)
 - [Find an example for IRM in Colab](https://colab.research.google.com/drive/1LHdHTFZSDweR6jgA7EXoZ1l-vdzAcrj5?usp=sharing)
 
 
