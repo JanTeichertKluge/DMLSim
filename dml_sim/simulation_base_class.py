@@ -365,11 +365,7 @@ class simulation_study:
                 print("\n")
                 for lvl_lrn_dict in self.lrn_dict.keys():
                     self._lrn_act = lvl_lrn_dict
-                    self._model_cache['theta_dml'] = np.zeros(shape=(self.n_rep,))
-                    self._model_cache['se_dml'] = np.zeros(shape=(self.n_rep,))
-                    self._model_cache['lowCI'] = np.zeros(shape=(self.n_rep,))
-                    self._model_cache['upCI'] = np.zeros(shape=(self.n_rep,))
-
+                    self._model_cache = {attr: np.zeros(shape=(self.n_rep,)) for attr in self._model_cache.keys()}
                     for self._i_rep in tqdm.tqdm(
                         range(self.n_rep),
                         bar_format="{l_bar}{bar:50}{r_bar}{bar:-50b}",
@@ -639,7 +635,7 @@ class simulation_study:
             "Relative Bias": self.performance_cache['rel_bias'],
             "Standardized Bias": self.performance_cache['std_bias'],
             "Root Mean Squared Error (RMSE)": self.performance_cache['rmse'],
-            "Average Standard Error (SE)": sself.performance_cache['avg_se'],
+            "Average Standard Error (SE)": self.performance_cache['avg_se'],
             "Empirical Deviation (ED)": self.performance_cache['empdev'],
             "Coverage of CI": self.performance_cache['coverage'],
         }
