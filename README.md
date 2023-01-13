@@ -53,7 +53,7 @@ pip install git+https://github.com/JanTeichertKluge/DMLSim.git
 - [Find an example for IRM in Colab](https://colab.research.google.com/drive/1LHdHTFZSDweR6jgA7EXoZ1l-vdzAcrj5?usp=sharing)
 
 
-Example Code for DMLSim:
+Example Code for DMLSim (IRM):
 ```python
 # Make imports
 from sklearn.base import clone
