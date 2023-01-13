@@ -355,7 +355,7 @@ class simulation_study:
                     self._i_rep = 0
                 print("\n")
 
-    def histplot(self, decision = False):
+    def histplot(self, show = False):
         """
     Plot histograms of the standardized bias for each learner and setting.
         
@@ -395,13 +395,13 @@ class simulation_study:
                 ax.set_xlim([-6.0, 6.0])
                 ax.set_xlabel("$(\hat{\\theta}_0 - \\theta_0)/ SE$")
                 ax.set_ylabel("Density")
-        if decision is True:
+        if show:
             for key in self.histograms.keys():
                 self.histograms[key].show()
             plt.show()
             plt.clf()
 
-    def boxplot(self, decision):
+    def boxplot(self, show = False):
         """
     Plot boxplots of the standardized bias for each learner and setting.
         
@@ -430,7 +430,7 @@ class simulation_study:
             ax.set_title(learner_i)
             ax.set_xlabel("Data setting")
             ax.set_ylabel("$(\hat{\\theta}_0 - \\theta_0)/ SE$")
-        if decision is True:
+        if show:
             for key in self.boxplots.keys():
                 self.boxplots[key].show()
             plt.show()
