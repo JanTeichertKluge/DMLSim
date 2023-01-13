@@ -57,7 +57,6 @@ def make_irm_friedman(n_obs=500, dim_x=20, return_type='DoubleMLData', **kwargs)
         and variable for the heterogeneous treatment effect.
         Returned if return_type='DoubleMLData'.
     """
-   
     x = np.random.uniform(0, 1, (n_obs, dim_x))
     px = expit(x[:, 0] + x[:, 1] - 0.5)
     d = np.random.binomial(n=1, p=px, size = n_obs)
@@ -120,8 +119,7 @@ def make_plr_fingerhut2018(n_obs=500, dim_x=20, theta=1, return_type='DoubleMLDa
     data : DoubleMLData
         A wrapper object containing the generated data with columns for input variables, output variable, and treatment variable.
         Returned if return_type='DoubleMLData'.
-    """
-        
+    """ 
     rrho = kwargs.get('rho', 0.8)
     majority_s = kwargs.get('majority_s', 0.75)
 
@@ -202,7 +200,6 @@ def make_irm_farell2021(n_obs=500, dim_x=20, return_type='DoubleMLData', **kwarg
         and variable for the heterogeneous treatment effect.
         Returned if return_type='DoubleMLData'.
     """
-    
     x = np.random.uniform(0, 1, (n_obs, dim_x))
     px = expit(x[:, 0] + x[:, 1] - 0.5)
     d = np.random.binomial(n=1, p=px, size = n_obs)
