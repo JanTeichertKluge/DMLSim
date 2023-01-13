@@ -396,6 +396,7 @@ class simulation_study:
                 ax.set_xlabel("$(\hat{\\theta}_0 - \\theta_0)/ SE$")
                 ax.set_ylabel("Density")
         if show:
+            plt.figure()
             for key in self.histograms.keys():
                 self.histograms[key].show()
             plt.show()
@@ -431,6 +432,7 @@ class simulation_study:
             ax.set_xlabel("Data setting")
             ax.set_ylabel("$(\hat{\\theta}_0 - \\theta_0)/ SE$")
         if show:
+            plt.figure()
             for key in self.boxplots.keys():
                 self.boxplots[key].show()
             plt.show()
