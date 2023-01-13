@@ -9,8 +9,9 @@ import doubleml
 import sklearn
 import tqdm
 
+
 class simulation_study:
-  """
+    """
   Initialize a simulation study object.
         
   Arguments
@@ -178,93 +179,104 @@ class simulation_study:
 
       [...]
   """
+    _model_attr = ['theta_dml',
+                   'se_dml',
+                   'lowCI',
+                   'upCI']
+    
+    _performance_measures = ['abs_bias',
+                             'rel_bias',
+                             'std_bias',
+                             'rmse',
+                             'avg_se',
+                             'empdev',
+                             'coverage']
+    def __init__(
+        self, model, is_heterogenous, score, DGP, n_rep, np_dict, lrn_dict, alpha
+    ):
+        self.model = model
+        self.score = score
+        self.n_folds = 3  # default
+        self.DGP = DGP
+        self.n_rep = n_rep
+        self.np_dict = np_dict
+        self.lrn_dict = lrn_dict
+        self.is_heterogenous = is_heterogenous
+        self.alpha = alpha
+        self._data = None
+        self._i_rep = 0  # initial
+        self._model_cache = {attr: np.zeros(shape=(n_rep,)) for attr in _model_attr}
+        self.model_attr = {attr: {key: {} for key in self.lrn_dict.keys()} for attr in _model_attr}
+        self._all_permutations = []
+        self._n_obs_act = None
+        self._dim_x_act = None
+        self._lrn_act = None
+        self._seed = 1234
+        self.performance_cache = {pm: {key: {} for key in self.lrn_dict.keys()} for pm in _performance_measures}
+        self.performance_df = None
+        self.histograms = {}
+        self.boxplots = {}
 
-  def __init__(self, model, is_heterogenous, score, DGP, n_rep, np_dict, lrn_dict, alpha):
-    self.model = model
-    self.score = score
-    self.n_folds = 3 #default
-    self.DGP = DGP
-    self.n_rep = n_rep
-    self.np_dict = np_dict
-    self.lrn_dict = lrn_dict
-    self.is_heterogenous = is_heterogenous
-    self.alpha = alpha
-    self._data = None
-    self._i_rep = 0 #initial
-    self._theta_dml_i = np.zeros(shape=(n_rep,))
-    self._se_dml_i = np.zeros(shape=(n_rep,))
-    self._lowCI_i = np.zeros(shape=(n_rep,))
-    self._upCI_i = np.zeros(shape=(n_rep,))
-    self.theta_dml = {key: {} for key in self.lrn_dict.keys()}
-    self.se_dml = {key: {} for key in self.lrn_dict.keys()}
-    self.lowCI = {key: {} for key in self.lrn_dict.keys()}
-    self.upCI = {key: {} for key in self.lrn_dict.keys()}
-    self._all_permutations = []
-    self._n_obs_act = None
-    self._dim_x_act = None
-    self._lrn_act = None
-    self._seed = 1234
-    self.abs_bias = {key: {} for key in self.lrn_dict.keys()}
-    self.rel_bias = {key: {} for key in self.lrn_dict.keys()}
-    self.std_bias = {key: {} for key in self.lrn_dict.keys()}
-    self.rmse = {key: {} for key in self.lrn_dict.keys()}
-    self.avg_se = {key: {} for key in self.lrn_dict.keys()}
-    self.empdev = {key: {} for key in self.lrn_dict.keys()}
-    self.coverage = {key: {} for key in self.lrn_dict.keys()}
-    self.performance_df = None
-    self.histograms = {}
-    self.boxplots = {}
+        np.random.seed(self._seed)
 
-    np.random.seed(self._seed)
+        if self.alpha is not None and self.is_heterogenous:
+            print(
+                "Warning: Instance is initialized with a specified\nvalue for alpha and heterogenous treatment effect."
+            )
+            print("Please make sure that this it intended")
+            print("\n")
 
-    if self.alpha is not None and self.is_heterogenous:
-      print('Warning: Instance is initialized with a specified\nvalue for alpha and heterogenous treatment effect.')
-      print('Please make sure that this it intended')
-      print('\n')
+        if self.is_heterogenous and self.alpha is not None:
+            self.theta_0 = alpha
+        elif self.is_heterogenous and self.alpha is None:
+            self.theta_0 = {}
+        elif not self.is_heterogenous and self.alpha is not None:
+            self.theta_0 = alpha
+        else:
+            raise ValueError(
+                "Setting for instance is selected as not heterogenous. Please select a value for the treatment effect."
+            )
 
-    if self.is_heterogenous and self.alpha is not None:
-      self.theta_0 = alpha
-    elif self.is_heterogenous and self.alpha is None:
-      self.theta_0 = {}
-    elif not self.is_heterogenous and self.alpha is not None:
-      self.theta_0 = alpha
-    else:
-      raise ValueError('Setting for instance is selected as not heterogenous. Please select a value for the treatment effect.')
-
-
-  def _prepare_data(self, setting):
-    """
+    def _prepare_data(self, setting):
+        """
     Prepare the n_rep datasets for a given n and dim_x setting.
 
     Parameters
     ----------
     setting : str
     """
-    self._data = list() #reset
-    if not self.is_heterogenous or (self.is_heterogenous and self.alpha is not None):
-      causal_param = 'alpha' if 'alpha' in self.DGP.__code__.co_varnames else 'theta'
-      DGP_kwargs = {  causal_param : self.alpha, 
-                      'n_obs': self._n_obs_act, 
-                      'dim_x': self._dim_x_act, 
-                      'return_type': 'array'}
+        self._data = list()  # reset
+        if not self.is_heterogenous or (
+            self.is_heterogenous and self.alpha is not None
+        ):
+            causal_param = (
+                "alpha" if "alpha" in self.DGP.__code__.co_varnames else "theta"
+            )
+            DGP_kwargs = {
+                causal_param: self.alpha,
+                "n_obs": self._n_obs_act,
+                "dim_x": self._dim_x_act,
+                "return_type": "array",
+            }
 
-      for _ in range(self.n_rep):
-        (x, y, d) = self.DGP(**DGP_kwargs)
-        self._data.append((x, y, d))
-    
+            for _ in range(self.n_rep):
+                (x, y, d) = self.DGP(**DGP_kwargs)
+                self._data.append((x, y, d))
 
-    elif self.is_heterogenous and self.alpha is None:
-      DGP_kwargs = {  'n_obs': self._n_obs_act, 
-                      'dim_x': self._dim_x_act, 
-                      'return_type': 'array'}
-      self.theta_0[setting] = list()
-      for _ in range(self.n_rep):
-        (x, y, d, treatment_eff) = self.DGP(**DGP_kwargs)
-        self._data.append((x, y, d))
-        self.theta_0[setting].append(np.mean(treatment_eff))
+        elif self.is_heterogenous and self.alpha is None:
+            DGP_kwargs = {
+                "n_obs": self._n_obs_act,
+                "dim_x": self._dim_x_act,
+                "return_type": "array",
+            }
+            self.theta_0[setting] = list()
+            for _ in range(self.n_rep):
+                (x, y, d, treatment_eff) = self.DGP(**DGP_kwargs)
+                self._data.append((x, y, d))
+                self.theta_0[setting].append(np.mean(treatment_eff))
 
-  def _create_dml_data_obj(self):
-    """
+    def _create_dml_data_obj(self):
+        """
     Create and return a :class: `DoubleMLData` object from arrays.
 
     Returns
@@ -272,17 +284,16 @@ class simulation_study:
     obj_dml_data :class:`DoubleMLData` object
     """
 
-    (x, y, d) = self._data[self._i_rep]
-    if 'neural_net' in self._lrn_act:
-      x = x.astype('float32')
-      y = y.astype('float32')
-      d = d.astype('float32')
-    obj_dml_data = doubleml.DoubleMLData.from_arrays(x, y, d)
-    return obj_dml_data
+        (x, y, d) = self._data[self._i_rep]
+        if "neural_net" in self._lrn_act:
+            x = x.astype("float32")
+            y = y.astype("float32")
+            d = d.astype("float32")
+        obj_dml_data = doubleml.DoubleMLData.from_arrays(x, y, d)
+        return obj_dml_data
 
-
-  def _create_dml_object(self, obj_dml_data):
-    """
+    def _create_dml_object(self, obj_dml_data):
+        """
     Create and return a :class: `DoubleML` object with the given 
     :class: `DoubleMLData` obj_dml_data object.
 
@@ -294,72 +305,88 @@ class simulation_study:
     ----------
     obj_dml_model :class:`DoubleML` object
     """
-    mll = sklearn.base.clone(self.lrn_dict[self._lrn_act]['ml_l']) if self.model == doubleml.double_ml_plr.DoubleMLPLR else None
-    mlm = sklearn.base.clone(self.lrn_dict[self._lrn_act]['ml_m'])
-    mlg = sklearn.base.clone(self.lrn_dict[self._lrn_act]['ml_g']) if not (self.model == doubleml.double_ml_plr.DoubleMLPLR and self.score == 'partialling out') else None
-    """
+        mll = (
+            sklearn.base.clone(self.lrn_dict[self._lrn_act]["ml_l"])
+            if self.model == doubleml.double_ml_plr.DoubleMLPLR
+            else None
+        )
+        mlm = sklearn.base.clone(self.lrn_dict[self._lrn_act]["ml_m"])
+        mlg = (
+            sklearn.base.clone(self.lrn_dict[self._lrn_act]["ml_g"])
+            if not (
+                self.model == doubleml.double_ml_plr.DoubleMLPLR
+                and self.score == "partialling out"
+            )
+            else None
+        )
+        """
     Banane: Frage: Ist "clone" hier noch notwendig, oder kopiert doubleml die learner sowieso?
     """
-    model_kwargs = {'obj_dml_data': obj_dml_data,
-                    'ml_m': mlm, 
-                    'ml_g': mlg,
-                    'n_folds': self.n_folds,
-                    'score': self.score}
+        model_kwargs = {
+            "obj_dml_data": obj_dml_data,
+            "ml_m": mlm,
+            "ml_g": mlg,
+            "n_folds": self.n_folds,
+            "score": self.score,
+        }
 
-    if self.model == doubleml.double_ml_plr.DoubleMLPLR: model_kwargs['ml_l'] = mll
+        if self.model == doubleml.double_ml_plr.DoubleMLPLR:
+            model_kwargs["ml_l"] = mll
 
-    obj_dml_model = self.model(**model_kwargs)
+        obj_dml_model = self.model(**model_kwargs)
 
-    return obj_dml_model
+        return obj_dml_model
 
-
-  def _run_fit(self):
-    """
+    def _run_fit(self):
+        """
     Performs a fit of a :class: `DoubleML` object and saves the results.
     """
-    data_obj = self._create_dml_data_obj()
-    obj_dml = self._create_dml_object(data_obj)
-    obj_dml.fit()
-    self._theta_dml_i[self._i_rep] = obj_dml.coef[0]
-    self._se_dml_i[self._i_rep] = obj_dml.se[0]
-    self._lowCI_i[self._i_rep] = obj_dml.confint()['2.5 %'][0]
-    self._upCI_i[self._i_rep] = obj_dml.confint()['97.5 %'][0]
+        data_obj = self._create_dml_data_obj()
+        obj_dml = self._create_dml_object(data_obj)
+        obj_dml.fit()
+        self._model_cache['theta_dml'][self._i_rep] = obj_dml.coef[0]
+        self._model_cache['se_dml'][self._i_rep] = obj_dml.se[0]
+        self._model_cache['lowCI'][self._i_rep] = obj_dml.confint()["2.5 %"][0]
+        self._model_cache['upCI'][self._i_rep] = obj_dml.confint()["97.5 %"][0]
 
-
-  def run_simulation(self):
-    """
+    def run_simulation(self):
+        """
     Performs the full simulation for all learners and settings.
     """
-    for self._n_obs_act in self.np_dict['n_obs']:
-      for self._dim_x_act in self.np_dict['dim_x']:
-        indx = str(self._n_obs_act) + '_' + str(self._dim_x_act)
-        self._all_permutations.append(indx)
-        print(f'Generating dataset via given DGP with n = {str(self._n_obs_act)} and dim_x = {str(self._dim_x_act)}...')
-        self._prepare_data(indx)
-        print(f'Starting with simulation sessions:')
-        print('\n')
-        for lvl_lrn_dict in self.lrn_dict.keys():
-          self._lrn_act = lvl_lrn_dict
-          self._theta_dml_i = np.zeros(shape=(self.n_rep,))
-          self._se_dml_i = np.zeros(shape=(self.n_rep,))
-          self._lowCI_i = np.zeros(shape=(self.n_rep,))
-          self._upCI_i = np.zeros(shape=(self.n_rep,))
+        for self._n_obs_act in self.np_dict["n_obs"]:
+            for self._dim_x_act in self.np_dict["dim_x"]:
+                indx = str(self._n_obs_act) + "_" + str(self._dim_x_act)
+                self._all_permutations.append(indx)
+                print(
+                    f"Generating dataset via given DGP with n = {str(self._n_obs_act)} and dim_x = {str(self._dim_x_act)}..."
+                )
+                self._prepare_data(indx)
+                print(f"Starting with simulation sessions:")
+                print("\n")
+                for lvl_lrn_dict in self.lrn_dict.keys():
+                    self._lrn_act = lvl_lrn_dict
+                    self._model_cache['theta_dml'] = np.zeros(shape=(self.n_rep,))
+                    self._model_cache['se_dml'] = np.zeros(shape=(self.n_rep,))
+                    self._model_cache['lowCI'] = np.zeros(shape=(self.n_rep,))
+                    self._model_cache['upCI'] = np.zeros(shape=(self.n_rep,))
 
-          for self._i_rep in tqdm.tqdm(range(self.n_rep), 
-                                       bar_format='{l_bar}{bar:50}{r_bar}{bar:-50b}',
-                                       ascii=False,
-                                       desc = f'{lvl_lrn_dict}'.ljust(20, '-')):
-            self._run_fit()
+                    for self._i_rep in tqdm.tqdm(
+                        range(self.n_rep),
+                        bar_format="{l_bar}{bar:50}{r_bar}{bar:-50b}",
+                        ascii=False,
+                        desc=f"{lvl_lrn_dict}".ljust(20, "-"),
+                    ):
+                        self._run_fit()
 
-          self.theta_dml[self._lrn_act][indx] = self._theta_dml_i
-          self.se_dml[self._lrn_act][indx] = self._se_dml_i
-          self.lowCI[self._lrn_act][indx] = self._lowCI_i
-          self.upCI[self._lrn_act][indx] = self._upCI_i
-          self._i_rep = 0
-        print('\n')
+                    self.model_attr['theta_dml'][self._lrn_act][indx] = self._model_cache['theta_dml']
+                    self.model_attr['se_dml'][self._lrn_act][indx] = self._model_cache['se_dml']
+                    self.model_attr['lowCI'][self._lrn_act][indx] = self._model_cache['lowCI']
+                    self.model_attr['upCI'][self._lrn_act][indx] = self._model_cache['upCI']
+                    self._i_rep = 0
+                print("\n")
 
-  def histplot(self):
-    """
+    def histplot(self, decision = False):
+        """
     Plot histograms of the standardized bias for each learner and setting.
         
     Parameters:
@@ -368,42 +395,44 @@ class simulation_study:
     Returns:
     None
     """
-    for learner_i in self.lrn_dict.keys():
-      for key in self.theta_dml[learner_i].keys():
-        n, dim_x = key.split('_')
-        theta_0 = self.theta_0[key] if self.is_heterogenous and self.alpha is None else self.theta_0
-        self.histograms[learner_i + '_' + key] = plt.figure(constrained_layout=True);
-        ax = sns.histplot((self.theta_dml[learner_i][key] - theta_0) / self.se_dml[learner_i][key],
-                          color=sns.color_palette('pastel')[2], edgecolor = sns.color_palette('dark')[2],
-                          stat='density', bins=30, label='DML estimation');
+        for learner_i in self.lrn_dict.keys():
+            for key in self.model_attr['theta_dml'][learner_i].keys():
+                n, dim_x = key.split("_")
+                theta_0 = (
+                    self.theta_0[key]
+                    if self.is_heterogenous and self.alpha is None
+                    else self.theta_0
+                )
+                self.histograms[learner_i + "_" + key] = plt.figure(
+                    constrained_layout=True
+                )
+                ax = sns.histplot(
+                    (self.model_attr['theta_dml'][learner_i][key] - theta_0)
+                    / self.model_attr['se_dml'][learner_i][key],
+                    color=sns.color_palette("pastel")[2],
+                    edgecolor=sns.color_palette("dark")[2],
+                    stat="density",
+                    bins=30,
+                    label="DML estimation",
+                )
 
-        ax.axvline(0., color='k');
-        ax.set_title(f'{learner_i} for $n_{{obs}}$={n}, $dim_x$={dim_x}')
-        xx = np.arange(-5, +5, 0.001)
-        yy = stats.norm.pdf(xx)
-        ax.plot(xx, yy, color='k', label='$\\mathcal{N}(0, 1)$');
-        ax.legend(loc='upper right', bbox_to_anchor=(1.2, 1.0));
-        ax.set_xlim([-6., 6.]);
-        ax.set_xlabel('$(\hat{\\theta}_0 - \\theta_0)/ SE$');
-        ax.set_ylabel('Density')
-    print('Show histograms? (Y/N)')
-    while True:
-      decision = input().upper()
-      if decision == 'Y':
-        break
-      elif decision == 'N':
-        break
-      else:
-        print("The input is invalid.\nPlease enter 'Y' or 'N'")
-    if decision == 'Y':
-      for key in self.histograms.keys():
-        self.histograms[key].show()
-      plt.show()
-      plt.clf()
+                ax.axvline(0.0, color="k")
+                ax.set_title(f"{learner_i} for $n_{{obs}}$={n}, $dim_x$={dim_x}")
+                xx = np.arange(-5, +5, 0.001)
+                yy = stats.norm.pdf(xx)
+                ax.plot(xx, yy, color="k", label="$\\mathcal{N}(0, 1)$")
+                ax.legend(loc="upper right", bbox_to_anchor=(1.2, 1.0))
+                ax.set_xlim([-6.0, 6.0])
+                ax.set_xlabel("$(\hat{\\theta}_0 - \\theta_0)/ SE$")
+                ax.set_ylabel("Density")
+        if decision is True:
+            for key in self.histograms.keys():
+                self.histograms[key].show()
+            plt.show()
+            plt.clf()
 
-
-  def boxplot(self):
-    """
+    def boxplot(self, decision):
+        """
     Plot boxplots of the standardized bias for each learner and setting.
         
     Parameters:
@@ -412,36 +441,33 @@ class simulation_study:
     Returns:
     None
     """
-    t1 = {key: {} for key in self.lrn_dict.keys()}
-    t2 = {key: None for key in self.lrn_dict.keys()}
-    for learner_i in self.lrn_dict.keys():
-      for key in self.theta_dml[learner_i].keys():
-        n, dim_x = key.split('_')
-        theta_0 = self.theta_0[key] if self.is_heterogenous and self.alpha is None else self.theta_0
-        t1[learner_i][f'$n_{{obs}}$={n}, $dim_x$={dim_x}'] = (self.theta_dml[learner_i][key] - theta_0) / self.se_dml[learner_i][key]
-      t2[learner_i] = pd.DataFrame.from_dict(t1[learner_i])
-      self.boxplots[learner_i] = plt.figure(constrained_layout=True);
-      ax = sns.boxplot(data = t2[learner_i], color=sns.color_palette('pastel')[2])
-      ax.set_title(learner_i)
-      ax.set_xlabel('Data setting')
-      ax.set_ylabel('$(\hat{\\theta}_0 - \\theta_0)/ SE$')
-    print('Show boxplots? (Y/N)')
-    while True:
-      decision = input().upper()
-      if decision == 'Y':
-        break
-      elif decision == 'N':
-        break
-      else:
-        print("The input is invalid.\nPlease enter 'Y' or 'N'")
-    if decision == 'Y':
-      for key in self.boxplots.keys():
-        self.boxplots[key].show()
-      plt.show()
-      plt.clf()
+        t1 = {key: {} for key in self.lrn_dict.keys()}
+        t2 = {key: None for key in self.lrn_dict.keys()}
+        for learner_i in self.lrn_dict.keys():
+            for key in self.model_attr['theta_dml'][learner_i].keys():
+                n, dim_x = key.split("_")
+                theta_0 = (
+                    self.theta_0[key]
+                    if self.is_heterogenous and self.alpha is None
+                    else self.theta_0
+                )
+                t1[learner_i][f"$n_{{obs}}$={n}, $dim_x$={dim_x}"] = (
+                    self.model_attr['theta_dml'][learner_i][key] - theta_0
+                ) / self.model_attr['se_dml'][learner_i][key]
+            t2[learner_i] = pd.DataFrame.from_dict(t1[learner_i])
+            self.boxplots[learner_i] = plt.figure(constrained_layout=True)
+            ax = sns.boxplot(data=t2[learner_i], color=sns.color_palette("pastel")[2])
+            ax.set_title(learner_i)
+            ax.set_xlabel("Data setting")
+            ax.set_ylabel("$(\hat{\\theta}_0 - \\theta_0)/ SE$")
+        if decision is True:
+            for key in self.boxplots.keys():
+                self.boxplots[key].show()
+            plt.show()
+            plt.clf()
 
-  def _absolute_bias(self, theta_dml_i, theta_0):
-    """
+    def _absolute_bias(self, theta_dml_i, theta_0):
+        """
     Calculate the average absolute bias.
     
     The absolute bias is defined as the mean of the predictions made by the learner
@@ -454,10 +480,10 @@ class simulation_study:
     Returns:
         float: The absolute bias.
     """
-    return np.mean(theta_dml_i - theta_0)
+        return np.mean(theta_dml_i - theta_0)
 
-  def _relative_bias(self, theta_dml_i, theta_0):
-    """
+    def _relative_bias(self, theta_dml_i, theta_0):
+        """
     Calculate the relative bias.
     
     The relative bias is defined as the mean of the difference between the predictions made
@@ -471,10 +497,10 @@ class simulation_study:
     Returns:
         float: The relative bias.
     """
-    return np.mean((theta_dml_i - theta_0) / theta_0)
+        return np.mean((theta_dml_i - theta_0) / theta_0)
 
-  def _standardized_bias(self, theta_dml_i, theta_0, se_dml_i):
-    """
+    def _standardized_bias(self, theta_dml_i, theta_0, se_dml_i):
+        """
     Calculate the standardized bias.
     
     The standardized bias is defined as the mean of the difference between the predictions
@@ -489,10 +515,10 @@ class simulation_study:
     Returns:
       float: the standardized bias.
     """
-    return np.mean((theta_dml_i) - theta_0) / np.mean(se_dml_i)
+        return np.mean((theta_dml_i) - theta_0) / np.mean(se_dml_i)
 
-  def _rmse(self, theta_dml_i, theta_0):
-    """
+    def _rmse(self, theta_dml_i, theta_0):
+        """
     Calculate the root mean squared error (RMSE).
     
     The RMSE is defined as the square root of the mean squared error between the predictions
@@ -505,10 +531,10 @@ class simulation_study:
     Returns:
       float: the root mean squared error
     """
-    return np.sqrt(np.mean((theta_dml_i - theta_0)**2))
+        return np.sqrt(np.mean((theta_dml_i - theta_0) ** 2))
 
-  def _average_se(self, se_dml_i):
-    """Calculate the average standard error.
+    def _average_se(self, se_dml_i):
+        """Calculate the average standard error.
 
     The average standard error is defined as the mean of the standard errors of the predictions
     made by the learner.
@@ -520,10 +546,10 @@ class simulation_study:
         float: the average standard error.
 
     """
-    return np.mean(se_dml_i)
+        return np.mean(se_dml_i)
 
-  def _empirical_deviation(self, theta_dml_i):
-    """
+    def _empirical_deviation(self, theta_dml_i):
+        """
     Calculate the empirical deviation.
     
     The empirical deviation is defined as the square root of the empirical variance between the 
@@ -536,10 +562,12 @@ class simulation_study:
         float: the empirical deviation.
 
     """
-    return np.sqrt((1 / (self.n_rep - 1)) * np.sum((theta_dml_i - np.mean(theta_dml_i))**2))
+        return np.sqrt(
+            (1 / (self.n_rep - 1)) * np.sum((theta_dml_i - np.mean(theta_dml_i)) ** 2)
+        )
 
-  def _coverage(self, lowCI_i, upCI_i, theta_0):
-    """
+    def _coverage(self, lowCI_i, upCI_i, theta_0):
+        """
     Calculate the coverage of the CIs.
 
     Coverage is defined as the proportion of times that the confidence interval for the
@@ -553,11 +581,13 @@ class simulation_study:
     Returns:
         float: the coverage.
     """
-    return np.sum(np.greater_equal(theta_0, lowCI_i) & np.less_equal(theta_0, upCI_i)) / self.n_rep
+        return (
+            np.sum(np.greater_equal(theta_0, lowCI_i) & np.less_equal(theta_0, upCI_i))
+            / self.n_rep
+        )
 
-
-  def iterate_performance_measures(self):
-    """
+    def iterate_performance_measures(self):
+        """
     Calculate the performance measures for each learner and each setting.
 
     Calculate the absolute bias, relative bias, standardized bias, root mean squared error, 
@@ -569,29 +599,54 @@ class simulation_study:
             dictionaries mapping learner names to dictionaries mapping settings (n_obs and dim_x as tuples of ints) 
             to the performance measure value for that learner and setting.
     """
-    for learner_i in self.lrn_dict.keys():
-      for setting in self._all_permutations:
-          theta_0 = self.theta_0[setting] if self.is_heterogenous and self.alpha is None else self.theta_0
-          self.abs_bias[learner_i][setting] = self._absolute_bias(self.theta_dml[learner_i][setting], theta_0)
-          self.rel_bias[learner_i][setting] = self._relative_bias(self.theta_dml[learner_i][setting], theta_0)
-          self.std_bias[learner_i][setting] = self._standardized_bias(self.theta_dml[learner_i][setting], theta_0, self.se_dml[learner_i][setting])
-          self.rmse[learner_i][setting] = self._rmse(self.theta_dml[learner_i][setting], theta_0)
-          self.avg_se[learner_i][setting] = self._average_se(self.se_dml[learner_i][setting])
-          self.empdev[learner_i][setting] = self._empirical_deviation(self.theta_dml[learner_i][setting]) if self.n_rep > 1 else None
-          self.coverage[learner_i][setting] = self._coverage(self.lowCI[learner_i][setting], self.upCI[learner_i][setting], theta_0)
-        
-    performance_dict = {'Absolute Bias': self.abs_bias, 
-                        'Relative Bias': self.rel_bias,
-                        'Standardized Bias': self.std_bias,
-                        'Root Mean Squared Error (RMSE)': self.rmse,
-                        'Average Standard Error (SE)':  self.avg_se,
-                        'Empirical Deviation (ED)': self.empdev,
-                        'Coverage of CI': self.coverage}
-    self.performance_dict = performance_dict
+        for learner_i in self.lrn_dict.keys():
+            for setting in self._all_permutations:
+                theta_0 = (
+                    self.theta_0[setting]
+                    if self.is_heterogenous and self.alpha is None
+                    else self.theta_0
+                )
+                self.performance_cache['abs_bias'][learner_i][setting] = self._absolute_bias(
+                    self.model_attr['theta_dml'][learner_i][setting], theta_0
+                )
+                self.performance_cache['rel_bias'][learner_i][setting] = self._relative_bias(
+                    self.model_attr['theta_dml'][learner_i][setting], theta_0
+                )
+                self.performance_cache['std_bias'][learner_i][setting] = self._standardized_bias(
+                    self.model_attr['theta_dml'][learner_i][setting],
+                    theta_0,
+                    self.model_attr['se_dml'][learner_i][setting],
+                )
+                self.performance_cache['rmse'][learner_i][setting] = self._rmse(
+                   self.model_attr['theta_dml'][learner_i][setting], theta_0
+                )
+                self.performance_cache['avg_se'][learner_i][setting] = self._average_se(
+                    self.model_attr['se_dml'][learner_i][setting]
+                )
+                self.performance_cache['empdev'][learner_i][setting] = (
+                    self._empirical_deviation(self.model_attr['theta_dml'][learner_i][setting])
+                    if self.n_rep > 1
+                    else None
+                )
+                self.performance_cache['coverage'][learner_i][setting] = self._coverage(
+                    self.model_attr['lowCI'][learner_i][setting],
+                    self.model_attr['upCI'][learner_i][setting],
+                    theta_0,
+                )
 
+        performance_dict = {
+            "Absolute Bias": self.performance_cache['abs_bias'],
+            "Relative Bias": self.performance_cache['rel_bias'],
+            "Standardized Bias": self.performance_cache['std_bias'],
+            "Root Mean Squared Error (RMSE)": self.performance_cache['rmse'],
+            "Average Standard Error (SE)": sself.performance_cache['avg_se'],
+            "Empirical Deviation (ED)": self.performance_cache['empdev'],
+            "Coverage of CI": self.performance_cache['coverage'],
+        }
+        self.performance_dict = performance_dict
 
-  def measure_performance(self):
-    """
+    def measure_performance(self):
+        """
     Measure the performance of each learner for each setting.
 
     This method calculates a number of performance measures for each learner and each setting,
@@ -604,17 +659,21 @@ class simulation_study:
         self: Returns an instance of the current object, with the results stored in the 
             `performance_df` attribute. 
     """
-    
-    self.iterate_performance_measures()
-    self.performance_df = pd.DataFrame.from_dict({(i,j): self.performance_dict[i][j] 
-                           for i in self.performance_dict.keys() 
-                           for j in self.performance_dict[i].keys()},
-                           orient='columns').T
 
-    print(self.performance_df)
+        self.iterate_performance_measures()
+        self.performance_df = pd.DataFrame.from_dict(
+            {
+                (i, j): self.performance_dict[i][j]
+                for i in self.performance_dict.keys()
+                for j in self.performance_dict[i].keys()
+            },
+            orient="columns",
+        ).T
 
-  def save(self, pth: str):
-    """
+        print(self.performance_df)
+
+    def save(self, pth: str):
+        """
     Save the simulation study's results to the specified path.
 
     The results that are saved including the model properties, DGP, number of replications, 
@@ -629,32 +688,35 @@ class simulation_study:
     Returns:
       None
     """
-    save_dict = {'model': self.__dict__['model'],
-                 'DGP': self.__dict__['DGP'],
-                 'n_rep': self.__dict__['n_rep'],
-                 'np_dict': self.__dict__['np_dict'],
-                 'lrn_dict': self.__dict__['lrn_dict'],
-                 'alpha': self.__dict__['alpha'],
-                 'seed' : self.__dict__['_seed'],
-                 'theta_dml': self.__dict__['theta_dml'],
-                 'se_dml': self.__dict__['se_dml'],
-                 'performance_measures': self.__dict__['performance_df']}
-    save_flatten = pd.json_normalize(save_dict, sep='_')
-    if not pth.endswith('/'): pth += '/'
-    try:
-      os.makedirs(pth)
-    except FileExistsError:
-      pass
-    save_flatten.to_json(pth + 'log.json')
-    pd.DataFrame(self.theta_dml).to_excel(pth + 'theta.xlsx')
-    pd.DataFrame(self.se_dml).to_excel(pth + 'se.xlsx')
-    self.performance_df.to_excel(pth + 'performance.xlsx')
-    try:
-      os.makedirs(pth + 'Histograms/')
-      os.makedirs(pth + 'Boxplots/')
-    except FileExistsError:
-      pass
-    for label, fig in self.histograms.items():
-      fig.savefig(pth + f'Histograms/Histogram_{label}.png')
-    for label, fig in self.boxplots.items():
-      fig.savefig(pth + f'Boxplots/Boxplot_{label}.png')
+        save_dict = {
+            "model": self.__dict__["model"],
+            "DGP": self.__dict__["DGP"],
+            "n_rep": self.__dict__["n_rep"],
+            "np_dict": self.__dict__["np_dict"],
+            "lrn_dict": self.__dict__["lrn_dict"],
+            "alpha": self.__dict__["alpha"],
+            "seed": self.__dict__["_seed"],
+            "theta_dml": self.__dict__["theta_dml"],
+            "se_dml": self.__dict__["se_dml"],
+            "performance_measures": self.__dict__["performance_df"],
+        }
+        save_flatten = pd.json_normalize(save_dict, sep="_")
+        if not pth.endswith("/"):
+            pth += "/"
+        try:
+            os.makedirs(pth)
+        except FileExistsError:
+            pass
+        save_flatten.to_json(pth + "log.json")
+        pd.DataFrame(self.theta_dml).to_excel(pth + "theta.xlsx")
+        pd.DataFrame(self.se_dml).to_excel(pth + "se.xlsx")
+        self.performance_df.to_excel(pth + "performance.xlsx")
+        try:
+            os.makedirs(pth + "Histograms/")
+            os.makedirs(pth + "Boxplots/")
+        except FileExistsError:
+            pass
+        for label, fig in self.histograms.items():
+            fig.savefig(pth + f"Histograms/Histogram_{label}.png")
+        for label, fig in self.boxplots.items():
+            fig.savefig(pth + f"Boxplots/Boxplot_{label}.png")
