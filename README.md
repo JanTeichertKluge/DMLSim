@@ -16,14 +16,14 @@ The module 'dml_nn' can be used to create a dictionary with the corresponding mo
 You are able to pass layer- and hyper-parameters when initializing the class 'network_builder'.
 
 The DGP (data generating process) should take at least 'n_obs', 'dim_x' as arguments. 
-'alpha' / 'theta' is necessary for some DGPs with non heterogenous treatment effect. 
+'alpha' / 'theta' is necessary for all DGPs with non heterogenous treatment effect. 
 The callable should return numpy arrays:
 - X, dim(X) = (n_obs, dim_x)
 - y, dim(y) = (n_obs,)
 - d, dim(d) = (n_obs,)
 - and theta, dim(theta) = (n_obs,) in order to calculate the average treatment effect if the treatment effect is heterogenous.
 
-In some cases, the DGP (doubleml.datasets.make_irm_data for example) generates a heterogenous from an argument with fixed value for theta. Initialize your instance with alpha choosen as None.
+In some cases, the DGP (i.e. doubleml.datasets.make_irm_data) generates a heterogenous treatment effect from an argument with fixed value for theta. I. these cases, initialize your instance with specific value for alpha.
 
 ## Installation
 
