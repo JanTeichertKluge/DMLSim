@@ -17,7 +17,7 @@ class NeuralNetRegressorXdoubleML(NeuralNetRegressor):
     super().fit(X, y)
 
   def predict(self, X):
-    pred = super().predict_proba(X) #banane: testen!
+    pred = super().predict(X) #banane: testen!
     return pred.reshape(-1)
 
 
@@ -45,5 +45,5 @@ class NeuralNetRegressorDoubleML:
         return self
 
     def predict(self, X):
-        preds = self.torch_nn.predict_proba(X)
+        preds = self.torch_nn.predict(X)
         return preds.reshape(-1)
