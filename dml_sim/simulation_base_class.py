@@ -677,9 +677,16 @@ class simulation_study:
         except FileExistsError:
             pass
         save_flatten.to_json(pth + "log.json")
-        pd.DataFrame(self.theta_dml).to_excel(pth + "theta.xlsx")
-        pd.DataFrame(self.se_dml).to_excel(pth + "se.xlsx")
-        self.performance_df.to_excel(pth + "performance.xlsx")
+        attribute_df = pd.DataFrame.from_dict(
+            {
+                (i, j): self.model_attr[i][j]
+                for i in self.model_attr.keys()
+                for j in self.model_attr[i].keys()
+            },
+            orient="columns",
+        ).T
+        attribute_df.to_excel(pth + "attributes.xlsx")
+        performance_df.to_excel(pth + "performances.xlsx")
         try:
             os.makedirs(pth + "Histograms/")
             os.makedirs(pth + "Boxplots/")
