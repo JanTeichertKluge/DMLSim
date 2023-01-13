@@ -205,14 +205,14 @@ class simulation_study:
         self.alpha = alpha
         self._data = None
         self._i_rep = 0  # initial
-        self._model_cache = {attr: np.zeros(shape=(n_rep,)) for attr in _model_attr}
-        self.model_attr = {attr: {key: {} for key in self.lrn_dict.keys()} for attr in _model_attr}
+        self._model_cache = {attr: np.zeros(shape=(n_rep,)) for attr in self._model_attr}
+        self.model_attr = {attr: {key: {} for key in self.lrn_dict.keys()} for attr in self._model_attr}
         self._all_permutations = []
         self._n_obs_act = None
         self._dim_x_act = None
         self._lrn_act = None
         self._seed = 1234
-        self.performance_cache = {pm: {key: {} for key in self.lrn_dict.keys()} for pm in _performance_measures}
+        self.performance_cache = {pm: {key: {} for key in self.lrn_dict.keys()} for pm in self._performance_measures}
         self.performance_df = None
         self.histograms = {}
         self.boxplots = {}
