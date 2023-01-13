@@ -13,7 +13,7 @@ Simulation studies with Double / debiased machine learning for
 Instances of the main class 'simulation_study' can be used with all learners from sklearn. 
 The learners need a fit() and a predict() method.
 The module 'dml_nn' can be used to create a dictionary with the corresponding models. 
-You are able to pass layer- and hyper-parameters when initializing the class 'simulation_learner'.
+You are able to pass layer- and hyper-parameters when initializing the class 'network_builder'.
 
 The DGP (data generating process) should take at least 'n_obs', 'dim_x' as arguments. 
 'alpha' / 'theta' is necessary for some DGPs with non heterogenous treatment effect. 
