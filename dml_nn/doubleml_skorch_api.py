@@ -17,7 +17,7 @@ class NeuralNetRegressorXdoubleML(NeuralNetRegressor):
     super().fit(X, y)
 
   def predict(self, X):
-    pred = super().predict_proba(X)
+    pred = super().predict_proba(X) #banane: testen!
     return pred.reshape(-1)
 
 
