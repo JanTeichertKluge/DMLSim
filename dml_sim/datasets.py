@@ -83,7 +83,7 @@ def make_irm_friedman(n_obs=500, dim_x=20, return_type='DoubleMLData', **kwargs)
         
 """
 def make_plr_fingerhut2018(n_obs=500, dim_x=20, theta=1, return_type='DoubleMLData', **kwargs):
-    """
+    
     Generates data from a PLR model as used in Fingerhut, Sesia, and Romano 2022.
     
     References: 
@@ -120,7 +120,7 @@ def make_plr_fingerhut2018(n_obs=500, dim_x=20, theta=1, return_type='DoubleMLDa
     data : DoubleMLData
         A wrapper object containing the generated data with columns for input variables, output variable, and treatment variable.
         Returned if return_type='DoubleMLData'.
-    """
+    
     
     rrho = kwargs.get('rho', 0.8)
     majority_s = kwargs.get('majority_s', 0.75)
