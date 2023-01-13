@@ -80,6 +80,8 @@ def make_irm_friedman(n_obs=500, dim_x=20, return_type='DoubleMLData', **kwargs)
     else:
         raise ValueError('Invalid return_type.')
 
+        
+"""
 def make_plr_fingerhut2018(n_obs=500, dim_x=20, theta=1, return_type='DoubleMLData', **kwargs):
     """
     Generates data from a PLR model as used in Fingerhut, Sesia, and Romano 2022.
@@ -160,7 +162,7 @@ def make_plr_fingerhut2018(n_obs=500, dim_x=20, theta=1, return_type='DoubleMLDa
             return DoubleMLData(data, 'y', 'd', x_cols)
     else:
         raise ValueError('Invalid return_type.')
-
+"""
 
 
 
