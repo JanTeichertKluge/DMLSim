@@ -686,7 +686,7 @@ class simulation_study:
             orient="columns",
         ).T
         attribute_df.to_excel(pth + "attributes.xlsx")
-        performance_df.to_excel(pth + "performances.xlsx")
+        self.performance_df.to_excel(pth + "performances.xlsx")
         try:
             os.makedirs(pth + "Histograms/")
             os.makedirs(pth + "Boxplots/")
