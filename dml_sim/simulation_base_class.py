@@ -9,6 +9,7 @@ import doubleml
 import sklearn
 import tqdm
 
+from _utils import check_key
 
 class simulation_study:
     """
@@ -82,39 +83,9 @@ class simulation_study:
           session. This is initialized as None.
       _seed (int): The seed to be used for the NumPy random number generator. This is
           initialized as 1234.
-      abs_bias (Dict[str, Dict[Tuple[int, int], float]]): A dictionary mapping learner
-          names to dictionaries that map settings (as tuples of ints) to the average absolute
-          bias of the estimates of the parameter being estimated for each replication.
-          This is initialized as an empty dictionary with keys for each learner.
-      rel_bias (Dict[str, Dict[Tuple[int, int], float]]): A dictionary mapping learner
-          names to dictionaries that map settings (as tuples of ints) to the average relative
-          bias of the estimates of the parameter being estimated for each replication.
-          This is initialized as an empty dictionary with keys for each learner.
-      std_bias (Dict[str (Dict[str, Dict[Tuple[int, int], float]]): A dictionary mapping learner names
-          to dictionaries that map settings (as tuples of ints) to the average standardized
-          bias of the estimates of the parameter being estimated for each replication.
-          This is initialized as an empty dictionary with keys for each learner.
-      rmse (Dict[str, Dict[Tuple[int, int], float]]): A dictionary mapping learner
-          names to dictionaries that map settings (as tuples of ints) to the root mean
-          squared error of the estimates of the parameter being estimated for each
-          replication. This is initialized as an empty dictionary with keys for each
-          learner.
-      avg_se (Dict[str, Dict[Tuple[int, int], float]]): A dictionary mapping learner
-          names to dictionaries that map settings (as tuples of ints) to the average
-          standard error of the estimates of the parameter being estimated for each
-          replication. This is initialized as an empty dictionary with keys for each
-          learner.
-      empdev (Dict[str, Dict[Tuple[int, int], float]]): A dictionary mapping learner
-          names to dictionaries that map settings (as tuples of ints) to the empirical
-          deviation of the estimates of the parameter being estimated for each
-          replication. This is initialized as an empty dictionary with keys for each
-          learner. If the number of replications is less than 2, this attribute will
-          not be calculated.
-      coverage (Dict[str, Dict[Tuple[int, int], float]]): A dictionary mapping
-          learner names to dictionaries that map settings (as tuples of ints) to the
-          coverage of the confidence intervals of the estimates of the parameter being
-          estimated for each replication. This is initialized as an empty dictionary
-          with keys for each learner.
+      performance_cache (Dict[str, Dict[str, Dict[]]])
+          A dictionary containing the results of the performance measures 
+          for each learner and setting. 
       performance_df (Pandas DataFrame or None): A DataFrame containing the results of
           the performance measures for each learner and setting (as tuples of ints). 
           The rows are indexed by a tuple containing the learner
@@ -210,6 +181,22 @@ class simulation_study:
             raise ValueError(
                 "Setting for instance is selected as not heterogenous. Please select a value for the treatment effect."
             )
+        for lrnr in self.lrn_dict.values():
+            if self.model == doubleml.double_ml_plr.DoubleMLPLR and self.score == 'IV-type':
+                if not (check_key(lrnr, 'ml_g') and check_key(lrnr, 'ml_m') and check_key(lrnr, 'ml_l')):
+                    raise ValueError('At least one learner is missing in your learner dict. Please check learner dictionary.')
+            elif self.model == doubleml.double_ml_plr.DoubleMLPLR and self.score == 'partialling out':
+                if not (check_key(lrnr, 'ml_m') and check_key(lrnr, 'ml_l')):
+                    raise ValueError('At least one learner is missing in your learner dict. Please check learner dictionary.')
+                elif check_key(lrnr, 'ml_g'):
+                    print('ml_g is in learner dict but not used or required.')
+            elif self.model == doubleml.double_ml_irm.DoubleMLIRM and (self.score == 'ATE' or self.score == 'ATTE'):
+                if not (check_key(lrnr, 'ml_g') and check_key(lrnr, 'ml_m')):
+                    raise ValueError('At least one learner is missing in your learner dict. Please check learner dictionary.')
+                elif check_key(lrnr, 'ml_l'):
+                    print('ml_l is in learner dict but not used or required.')
+            else:
+                raise ValueError('The given score function does not match to the given model. Please check model and score type.')
 
     def _prepare_data(self, setting):
         """
