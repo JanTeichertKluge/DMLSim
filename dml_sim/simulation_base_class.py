@@ -315,6 +315,7 @@ class simulation_study:
     """
         for self._n_obs_act in self.np_dict["n_obs"]:
             for self._dim_x_act in self.np_dict["dim_x"]:
+                np.random.seed(self._seed)
                 indx = str(self._n_obs_act) + "_" + str(self._dim_x_act)
                 self._all_permutations.append(indx)
                 print(
