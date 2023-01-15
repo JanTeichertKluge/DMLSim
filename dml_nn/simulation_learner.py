@@ -131,16 +131,16 @@ class network_builder:
                  lr=0.001, 
                  batch_size=128, 
                  n_epochs=100, 
-                 early_stopping=10):
+                 early_stopping=10,
+                 seed=1234):
         self.layer_sizes = layer_sizes
         self.dropout = dropout
         self.lr = lr
         self.batch_size = batch_size
         self.n_epochs = n_epochs
         self.early_stopping = early_stopping
+        self.seed = seed
         
-        torch.manual_seed(1234)
-
     # Method to build Neural Network models
     def _prepare_neural_networks(self):
         """
@@ -160,6 +160,7 @@ class network_builder:
         # Iterate over the layer sizes
         for name, size in self.layer_sizes.items():
             # Create the model
+            torch.manual_seed(self.seed)
             model_reg = RegressorModel(sizes = size, dropout = self.dropout)
             model_cls = ClassifierModel(sizes = size, dropout = self.dropout)
             skorch_regressor = NeuralNetRegressorDoubleML(

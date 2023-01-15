@@ -8,7 +8,9 @@ import openpyxl
 import doubleml
 import sklearn
 import tqdm
+import torch
 
+from ._utils import check_key
 
 class simulation_study:
     """
@@ -82,39 +84,9 @@ class simulation_study:
           session. This is initialized as None.
       _seed (int): The seed to be used for the NumPy random number generator. This is
           initialized as 1234.
-      abs_bias (Dict[str, Dict[Tuple[int, int], float]]): A dictionary mapping learner
-          names to dictionaries that map settings (as tuples of ints) to the average absolute
-          bias of the estimates of the parameter being estimated for each replication.
-          This is initialized as an empty dictionary with keys for each learner.
-      rel_bias (Dict[str, Dict[Tuple[int, int], float]]): A dictionary mapping learner
-          names to dictionaries that map settings (as tuples of ints) to the average relative
-          bias of the estimates of the parameter being estimated for each replication.
-          This is initialized as an empty dictionary with keys for each learner.
-      std_bias (Dict[str (Dict[str, Dict[Tuple[int, int], float]]): A dictionary mapping learner names
-          to dictionaries that map settings (as tuples of ints) to the average standardized
-          bias of the estimates of the parameter being estimated for each replication.
-          This is initialized as an empty dictionary with keys for each learner.
-      rmse (Dict[str, Dict[Tuple[int, int], float]]): A dictionary mapping learner
-          names to dictionaries that map settings (as tuples of ints) to the root mean
-          squared error of the estimates of the parameter being estimated for each
-          replication. This is initialized as an empty dictionary with keys for each
-          learner.
-      avg_se (Dict[str, Dict[Tuple[int, int], float]]): A dictionary mapping learner
-          names to dictionaries that map settings (as tuples of ints) to the average
-          standard error of the estimates of the parameter being estimated for each
-          replication. This is initialized as an empty dictionary with keys for each
-          learner.
-      empdev (Dict[str, Dict[Tuple[int, int], float]]): A dictionary mapping learner
-          names to dictionaries that map settings (as tuples of ints) to the empirical
-          deviation of the estimates of the parameter being estimated for each
-          replication. This is initialized as an empty dictionary with keys for each
-          learner. If the number of replications is less than 2, this attribute will
-          not be calculated.
-      coverage (Dict[str, Dict[Tuple[int, int], float]]): A dictionary mapping
-          learner names to dictionaries that map settings (as tuples of ints) to the
-          coverage of the confidence intervals of the estimates of the parameter being
-          estimated for each replication. This is initialized as an empty dictionary
-          with keys for each learner.
+      performance_cache (Dict[str, Dict[str, Dict[]]])
+          A dictionary containing the results of the performance measures 
+          for each learner and setting. 
       performance_df (Pandas DataFrame or None): A DataFrame containing the results of
           the performance measures for each learner and setting (as tuples of ints). 
           The rows are indexed by a tuple containing the learner
@@ -166,7 +138,7 @@ class simulation_study:
                              'empdev',
                              'coverage']
     def __init__(
-        self, model, is_heterogenous, score, DGP, n_rep, np_dict, lrn_dict, alpha
+        self, model, is_heterogenous, score, DGP, n_rep, np_dict, lrn_dict, alpha, seed=1234
     ):
         self.model = model
         self.score = score
@@ -185,13 +157,11 @@ class simulation_study:
         self._n_obs_act = None
         self._dim_x_act = None
         self._lrn_act = None
-        self._seed = 1234
+        self._seed = seed
         self.performance_cache = {pm: {key: {} for key in self.lrn_dict.keys()} for pm in self._performance_measures}
         self.performance_df = None
         self.histograms = {}
         self.boxplots = {}
-
-        np.random.seed(self._seed)
 
         if self.alpha is not None and self.is_heterogenous:
             print(
@@ -210,6 +180,22 @@ class simulation_study:
             raise ValueError(
                 "Setting for instance is selected as not heterogenous. Please select a value for the treatment effect."
             )
+        for lrnr in self.lrn_dict.values():
+            if self.model == doubleml.double_ml_plr.DoubleMLPLR and self.score == 'IV-type':
+                if not (check_key(lrnr, 'ml_g') and check_key(lrnr, 'ml_m') and check_key(lrnr, 'ml_l')):
+                    raise ValueError('At least one learner is missing in your learner dict. Please check learner dictionary.')
+            elif self.model == doubleml.double_ml_plr.DoubleMLPLR and self.score == 'partialling out':
+                if not (check_key(lrnr, 'ml_m') and check_key(lrnr, 'ml_l')):
+                    raise ValueError('At least one learner is missing in your learner dict. Please check learner dictionary.')
+                elif check_key(lrnr, 'ml_g'):
+                    print('ml_g is in learner dict but not used or required.')
+            elif self.model == doubleml.double_ml_irm.DoubleMLIRM and (self.score == 'ATE' or self.score == 'ATTE'):
+                if not (check_key(lrnr, 'ml_g') and check_key(lrnr, 'ml_m')):
+                    raise ValueError('At least one learner is missing in your learner dict. Please check learner dictionary.')
+                elif check_key(lrnr, 'ml_l'):
+                    print('ml_l is in learner dict but not used or required.')
+            else:
+                raise ValueError('The given score function does not match to the given model. Please check model and score type.')
 
     def _prepare_data(self, setting):
         """
@@ -257,7 +243,6 @@ class simulation_study:
     ----------
     obj_dml_data :class:`DoubleMLData` object
     """
-
         (x, y, d) = self._data[self._i_rep]
         if "neural_net" in self._lrn_act:
             x = x.astype("float32")
@@ -280,13 +265,13 @@ class simulation_study:
     obj_dml_model :class:`DoubleML` object
     """
         mll = (
-            sklearn.base.clone(self.lrn_dict[self._lrn_act]["ml_l"])
+            self.lrn_dict[self._lrn_act]["ml_l"]
             if self.model == doubleml.double_ml_plr.DoubleMLPLR
             else None
         )
-        mlm = sklearn.base.clone(self.lrn_dict[self._lrn_act]["ml_m"])
+        mlm = self.lrn_dict[self._lrn_act]["ml_m"]
         mlg = (
-            sklearn.base.clone(self.lrn_dict[self._lrn_act]["ml_g"])
+           self.lrn_dict[self._lrn_act]["ml_g"]
             if not (
                 self.model == doubleml.double_ml_plr.DoubleMLPLR
                 and self.score == "partialling out"
@@ -329,6 +314,7 @@ class simulation_study:
     """
         for self._n_obs_act in self.np_dict["n_obs"]:
             for self._dim_x_act in self.np_dict["dim_x"]:
+                np.random.seed(self._seed) #make it reproducible
                 indx = str(self._n_obs_act) + "_" + str(self._dim_x_act)
                 self._all_permutations.append(indx)
                 print(
@@ -339,7 +325,9 @@ class simulation_study:
                 print("\n")
                 for lvl_lrn_dict in self.lrn_dict.keys():
                     self._lrn_act = lvl_lrn_dict
-                    self._model_cache = {attr: np.zeros(shape=(self.n_rep,)) for attr in self._model_cache.keys()}
+                    np.random.seed(self._seed) #make it reproducible
+                    torch.manual_seed(self._seed)
+                    self._model_cache = {attr: np.empty(shape=(self.n_rep,)) for attr in self._model_attr}
                     for self._i_rep in tqdm.tqdm(
                         range(self.n_rep),
                         bar_format="{l_bar}{bar:50}{r_bar}{bar:-50b}",
