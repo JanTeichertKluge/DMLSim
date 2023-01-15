@@ -162,8 +162,6 @@ class simulation_study:
         self.histograms = {}
         self.boxplots = {}
 
-        np.random.seed(self._seed)
-
         if self.alpha is not None and self.is_heterogenous:
             print(
                 "Warning: Instance is initialized with a specified\nvalue for alpha and heterogenous treatment effect."
@@ -315,7 +313,7 @@ class simulation_study:
     """
         for self._n_obs_act in self.np_dict["n_obs"]:
             for self._dim_x_act in self.np_dict["dim_x"]:
-                np.random.seed(self._seed)
+                np.random.seed(self._seed) #make it reproducible
                 indx = str(self._n_obs_act) + "_" + str(self._dim_x_act)
                 self._all_permutations.append(indx)
                 print(
@@ -326,7 +324,7 @@ class simulation_study:
                 print("\n")
                 for lvl_lrn_dict in self.lrn_dict.keys():
                     self._lrn_act = lvl_lrn_dict
-                    np.random.seed(self._seed)
+                    np.random.seed(self._seed) #make it reproducible
                     self._model_cache = {attr: np.empty(shape=(self.n_rep,)) for attr in self._model_attr}
                     for self._i_rep in tqdm.tqdm(
                         range(self.n_rep),
