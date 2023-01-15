@@ -326,7 +326,8 @@ class simulation_study:
                 print("\n")
                 for lvl_lrn_dict in self.lrn_dict.keys():
                     self._lrn_act = lvl_lrn_dict
-                    self._model_cache = {attr: np.zeros(shape=(self.n_rep,)) for attr in self._model_cache.keys()}
+                    np.random.seed(self._seed)
+                    self._model_cache = {attr: np.empty(shape=(self.n_rep,)) for attr in self._model_attr}
                     for self._i_rep in tqdm.tqdm(
                         range(self.n_rep),
                         bar_format="{l_bar}{bar:50}{r_bar}{bar:-50b}",
