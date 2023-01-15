@@ -8,6 +8,7 @@ import openpyxl
 import doubleml
 import sklearn
 import tqdm
+import torch
 
 from ._utils import check_key
 
@@ -325,6 +326,7 @@ class simulation_study:
                 for lvl_lrn_dict in self.lrn_dict.keys():
                     self._lrn_act = lvl_lrn_dict
                     np.random.seed(self._seed) #make it reproducible
+                    torch.manual_seed(self._seed)
                     self._model_cache = {attr: np.empty(shape=(self.n_rep,)) for attr in self._model_attr}
                     for self._i_rep in tqdm.tqdm(
                         range(self.n_rep),
