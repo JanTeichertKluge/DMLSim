@@ -266,13 +266,13 @@ class simulation_study:
     obj_dml_model :class:`DoubleML` object
     """
         mll = (
-            sklearn.base.clone(self.lrn_dict[self._lrn_act]["ml_l"])
+            self.lrn_dict[self._lrn_act]["ml_l"]
             if self.model == doubleml.double_ml_plr.DoubleMLPLR
             else None
         )
-        mlm = sklearn.base.clone(self.lrn_dict[self._lrn_act]["ml_m"])
+        mlm = self.lrn_dict[self._lrn_act]["ml_m"]
         mlg = (
-            sklearn.base.clone(self.lrn_dict[self._lrn_act]["ml_g"])
+           self.lrn_dict[self._lrn_act]["ml_g"]
             if not (
                 self.model == doubleml.double_ml_plr.DoubleMLPLR
                 and self.score == "partialling out"
