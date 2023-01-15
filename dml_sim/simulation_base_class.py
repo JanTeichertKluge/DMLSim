@@ -304,6 +304,7 @@ class simulation_study:
         data_obj = self._create_dml_data_obj()
         obj_dml = self._create_dml_object(data_obj)
         obj_dml.fit()
+        print(obj_dml.coef[0])
         self._model_cache['theta_dml'][self._i_rep] = obj_dml.coef[0]
         self._model_cache['se_dml'][self._i_rep] = obj_dml.se[0]
         self._model_cache['lowCI'][self._i_rep] = obj_dml.confint()["2.5 %"][0]
