@@ -123,9 +123,9 @@ scenario_A.save('/content/NEW_FOLDER')
 
 ## Tests 
 
-# Tests for reproducibility
+### Tests for reproducibility
 - [Find an iPy Notebook in Colab](https://colab.research.google.com/drive/1-AJ-Jc9OBFO6tsIs7m62OD9g6sFLFnCu?usp=sharing)
 
-# Unittests
+### Unittests
 - See 'tests' folder in dml_sim package
 - tbc. for dml_nn
