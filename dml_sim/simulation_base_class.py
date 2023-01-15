@@ -137,7 +137,7 @@ class simulation_study:
                              'empdev',
                              'coverage']
     def __init__(
-        self, model, is_heterogenous, score, DGP, n_rep, np_dict, lrn_dict, alpha
+        self, model, is_heterogenous, score, DGP, n_rep, np_dict, lrn_dict, alpha, seed=1234
     ):
         self.model = model
         self.score = score
@@ -156,7 +156,7 @@ class simulation_study:
         self._n_obs_act = None
         self._dim_x_act = None
         self._lrn_act = None
-        self._seed = 1234
+        self._seed = seed
         self.performance_cache = {pm: {key: {} for key in self.lrn_dict.keys()} for pm in self._performance_measures}
         self.performance_df = None
         self.histograms = {}
