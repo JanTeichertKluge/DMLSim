@@ -244,7 +244,6 @@ class simulation_study:
     ----------
     obj_dml_data :class:`DoubleMLData` object
     """
-        print(f"create_dml_data_obj for n_rep_i = {self._i_rep}")
         (x, y, d) = self._data[self._i_rep]
         if "neural_net" in self._lrn_act:
             x = x.astype("float32")
@@ -304,13 +303,11 @@ class simulation_study:
     """
         data_obj = self._create_dml_data_obj()
         obj_dml = self._create_dml_object(data_obj)
-        print(f"Fitting model for n_rep_i = {self._i_rep}")
         obj_dml.fit()
         self._model_cache['theta_dml'][self._i_rep] = obj_dml.coef[0]
         self._model_cache['se_dml'][self._i_rep] = obj_dml.se[0]
         self._model_cache['lowCI'][self._i_rep] = obj_dml.confint()["2.5 %"][0]
         self._model_cache['upCI'][self._i_rep] = obj_dml.confint()["97.5 %"][0]
-        print(f"++++++++++++ saved results for n_rep_i = {self._i_rep}+++++++++++++++++")
 
     def run_simulation(self):
         """
