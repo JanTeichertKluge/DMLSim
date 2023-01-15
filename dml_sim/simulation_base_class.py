@@ -9,7 +9,7 @@ import doubleml
 import sklearn
 import tqdm
 
-from _utils import check_key
+from ._utils import check_key
 
 class simulation_study:
     """
