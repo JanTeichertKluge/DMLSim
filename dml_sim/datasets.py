@@ -210,6 +210,8 @@ def make_irm_farell2021(n_obs=500, dim_x=20, return_type='DoubleMLData', **kwarg
     bias_p = 0.09 # alpha_{p,1}
     count = comb(dim_x, 2, True, True)
 
+    # Following vectors are generated with a fixed Random State for each simulation run
+    # Resulting in same vectors for each repetition according to Farell et al.
     r = np.random.RandomState(1234)
     alpha_theta = r.uniform(low=0.1, high=0.22, size=[dim_x, 1])
     alpha_g = r.normal(loc=0.3, scale=0.7, size=[1, dim_x])
