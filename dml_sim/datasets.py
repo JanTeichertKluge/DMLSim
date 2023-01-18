@@ -208,6 +208,7 @@ def make_irm_farell2021(n_obs=500, dim_x=20, return_type='DoubleMLData', **kwarg
     bias_theta = -0.05 #alpha_{theta,1}
     bias_g = 0.09 # alpha_{g,1}
     bias_p = 0.09 # alpha_{p,1}
+    count = comb(dim_x, 2, True, True)
 
     r = np.random.RandomState(1234)
     alpha_theta = r.uniform(low=0.1, high=0.22, size=[dim_x, 1])
@@ -219,7 +220,6 @@ def make_irm_farell2021(n_obs=500, dim_x=20, return_type='DoubleMLData', **kwarg
     x = np.random.uniform(low=0, high=1, size=[n_obs, dim_x])
     normal_errors = np.random.normal(size=[n_obs, 1], loc=0.0, scale=1.0)
     alpha_theta_X = np.dot(x, alpha_theta) + bias_theta
-    count = comb(dim_x, 2, True, True)
     # Second Degree polynomial (Phi score)
     polynomial_indices = combinations_with_replacement(list(range(dim_x)), 2)
     for p in polynomial_indices:
