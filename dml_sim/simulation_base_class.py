@@ -233,7 +233,12 @@ class simulation_study:
             for _ in range(self.n_rep):
                 (x, y, d, treatment_eff) = self.DGP(**DGP_kwargs)
                 self._data.append((x, y, d))
-                self.theta_0[setting].append(np.mean(treatment_eff))
+                if self.score == "ATE":
+                    self.theta_0[setting].append(np.mean(treatment_eff))
+                elif self.score == "ATTE":
+                    self.theta_0[setting].append(np.mean(treatment_eff[d==1]))
+                else:
+                    print('The given score function does not match to the defined model setting.')
 
     def _create_dml_data_obj(self):
         """
