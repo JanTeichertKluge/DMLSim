@@ -6,6 +6,10 @@ from sklearn.datasets import make_spd_matrix
 from doubleml import DoubleMLData, DoubleMLClusterData
 from scipy.special import expit
 
+# for make_irm_farell2021
+from scipy.special import comb
+from itertools import combinations_with_replacement
+
 #for make_plr_fingerhut2018
 from functools import reduce
 from operator import mul
@@ -162,9 +166,7 @@ def make_plr_fingerhut2018(n_obs=500, dim_x=20, theta=1, return_type='DoubleMLDa
         raise ValueError('Invalid return_type.')
 
 
-
 def make_irm_farell2021(n_obs=500, dim_x=20, return_type='DoubleMLData', **kwargs):
-    
     """
     Generates data based on a non-linear model for treatment assignment dependent on the covariates as used
     in Farrell, Liang, and Misra 2021.
@@ -199,21 +201,46 @@ def make_irm_farell2021(n_obs=500, dim_x=20, return_type='DoubleMLData', **kwarg
         and variable for the heterogeneous treatment effect.
         Returned if return_type='DoubleMLData'.
     """
-    x = np.random.uniform(0, 1, (n_obs, dim_x))
-    px = expit(x[:, 0] + x[:, 1] - 0.5)
-    d = np.random.binomial(n=1, p=px, size = n_obs)
-    
-    g = 10*np.sin(np.pi*x[:, 1]*x[:, 2]) + 20*(x[:, 3]-0.5)**2+10*x[:, 4] + 5*x[:, 5]
-    
-    theta = x[:, 3]*np.cos(np.pi*x[:, 1]*x[:, 2])
-    
-    y = theta * d + g + np.random.standard_normal(size=[n_obs, ])
-    
+
+    i = 0
+    beta_theta_phi_X = 0
+    beta_g_phi_X = 0
+    bias_theta = -0.05 #alpha_{theta,1}
+    bias_g = 0.09 # alpha_{g,1}
+    bias_p = 0.09 # alpha_{p,1}
+
+    r = np.random.RandomState(1234)
+    alpha_theta = r.uniform(low=0.1, high=0.22, size=[dim_x, 1])
+    alpha_g = r.normal(loc=0.3, scale=0.7, size=[1, dim_x])
+    beta_theta = r.uniform(low=-0.05, high=0.06, size=count)
+    beta_g = r.normal(loc=0.01, scale=0.3, size=count)
+
+    alpha_p = np.random.uniform(low=-0.55, high=0.55, size=[20, 1])
+    x = np.random.uniform(low=0, high=1, size=[n_obs, dim_x])
+    normal_errors = np.random.normal(size=[n_obs, 1], loc=0.0, scale=1.0)
+    alpha_theta_X = np.dot(x, alpha_theta) + bias_theta
+    count = comb(dim_x, 2, True, True)
+    # Second Degree polynomial (Phi score)
+    polynomial_indices = combinations_with_replacement(list(range(dim_x)), 2)
+    for p in polynomial_indices:
+        beta_theta_phi_X += beta_theta[i]*np.multiply(x[:, p[0]], x[:, p[1]])
+        beta_g_phi_X += beta_g[i]*np.multiply(x[:, p[0]], x[:, p[1]])
+        i += 1
+    beta_theta_phi_X = beta_theta_phi_X.reshape(-1, 1)
+    beta_g_phi_X = beta_g_phi_X.reshape(-1,1)
+    theta = alpha_theta_X + beta_theta_phi_X
+    g = np.dot(x, alpha_g.T) + bias_g +  beta_g_phi_X
+    alpha_p_X = np.dot(x[:, :20], alpha_p) + bias_p
+    alpha_p_X = alpha_p_X.reshape(-1)
+    prob_of_d = expit(alpha_p_X)
+    d = np.random.binomial(size=n_obs, n=1, p=prob_of_d).reshape(n_obs,)
+    theta = theta.reshape(-1)
+    y = g.reshape(-1) + theta*d + normal_errors.reshape(-1)
 
     if return_type in _array_alias:
         return x, y, d, theta
     elif return_type in _data_frame_alias + _dml_data_alias:
-        x_cols = [f'X{i + 1}' for i in np.arange(dim_x)]
+        x_cols = [f'x{i + 1}' for i in np.arange(dim_x)]
         data = pd.DataFrame(np.column_stack((x, y, d)),   
                             columns=x_cols + ['y', 'd'])
         if return_type in _data_frame_alias:
