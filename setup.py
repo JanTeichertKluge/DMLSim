@@ -3,7 +3,7 @@ setup(
     name='DMLSim',
     packages=['dml_sim', 'dml_nn'],
     #py_modules=['datasets', 'doubleml_skorch_api', 'simulation_base_class'],
-    version='0.1.0',
+    version='0.1.1',
     description='package to run DoubleML simulation studies',
     author=['Sundermann, Moritz <moritz.sundermann@studium.uni-hamburg.de>', 
             'Teichert-Kluge, Jan <jan.teichert-kluge@studium.uni-hamburg.de>'],
