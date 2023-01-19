@@ -1,11 +1,11 @@
 def check_key(element, *keys):
-    '''
+    """
     Check if *keys (nested) exists in dict
-    '''
+    """
     if not isinstance(element, dict):
-        raise AttributeError('Expects dict as first argument.')
+        raise AttributeError("Expects dict as first argument.")
     if len(keys) == 0:
-        raise AttributeError('check_key expects at least two arguments, one given.')
+        raise AttributeError("check_key expects at least two arguments, one given.")
 
     _element = element
     for key in keys:
@@ -14,5 +14,3 @@ def check_key(element, *keys):
         except KeyError:
             return False
     return True
-
-            
