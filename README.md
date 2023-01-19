@@ -25,6 +25,12 @@ The callable should return numpy arrays:
 
 In some cases, the DGP (i.e. doubleml.datasets.make_irm_data) generates a heterogenous treatment effect from an argument with fixed value for theta. In these cases, initialize your instance with specific value for alpha.
 
+The currently supported DGPs:
+- all DGPs from doubleml.datasets
+- all DGPs from dml_sim.datasets
+- DGPs from the [opossum package](https://github.com/jgitr/opossum)
+
+
 ## Installation
 
 **DMLSim** requires
