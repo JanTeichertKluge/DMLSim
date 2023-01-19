@@ -139,6 +139,7 @@ class network_builder:
         early_stopping=10,
         seed=1234,
         weight_decay=0,
+        optimizer=optim.Adam,
     ):
         self.layer_sizes = layer_sizes
         self.dropout = dropout
@@ -148,6 +149,7 @@ class network_builder:
         self.early_stopping = early_stopping
         self.seed = seed
         self.weight_decay = weight_decay
+        self.optimizer = optimizer
 
     # Method to build Neural Network models
     def _prepare_neural_networks(self):
@@ -174,7 +176,7 @@ class network_builder:
             skorch_regressor = NeuralNetRegressorDoubleML(
                 module=model_reg,
                 criterion=nn.MSELoss,
-                optimizer=optim.Adam,
+                optimizer=self.optimizer,
                 optimizer__weight_decay=self.weight_decay,
                 lr=self.lr,
                 device="cuda" if torch.cuda.is_available() else "cpu",
@@ -187,7 +189,7 @@ class network_builder:
             skorch_classifier = NeuralNetClassifier(
                 module=model_cls,
                 criterion=nn.CrossEntropyLoss,
-                optimizer=optim.Adam,
+                optimizer=self.optimizer,
                 optimizer__weight_decay=self.weight_decay,
                 lr=self.lr,
                 device="cuda" if torch.cuda.is_available() else "cpu",
