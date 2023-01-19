@@ -138,6 +138,7 @@ class network_builder:
         n_epochs=100,
         early_stopping=10,
         seed=1234,
+        weight_decay=0,
     ):
         self.layer_sizes = layer_sizes
         self.dropout = dropout
@@ -146,6 +147,7 @@ class network_builder:
         self.n_epochs = n_epochs
         self.early_stopping = early_stopping
         self.seed = seed
+        self.weight_decay = weight_decay
 
     # Method to build Neural Network models
     def _prepare_neural_networks(self):
@@ -173,6 +175,7 @@ class network_builder:
                 module=model_reg,
                 criterion=nn.MSELoss,
                 optimizer=optim.Adam,
+                optimizer__weight_decay=self.weight_decay,
                 lr=self.lr,
                 device="cuda" if torch.cuda.is_available() else "cpu",
                 batch_size=self.batch_size,
@@ -185,6 +188,7 @@ class network_builder:
                 module=model_cls,
                 criterion=nn.CrossEntropyLoss,
                 optimizer=optim.Adam,
+                optimizer__weight_decay=self.weight_decay,
                 lr=self.lr,
                 device="cuda" if torch.cuda.is_available() else "cpu",
                 batch_size=self.batch_size,
