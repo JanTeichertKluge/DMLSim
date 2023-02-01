@@ -1,12 +1,10 @@
 import os
 import numpy as np
 import scipy.stats as stats
-import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
 import doubleml
 import sklearn
-import tqdm
 import torch
 
 from ._utils import check_key
@@ -364,22 +362,13 @@ class simulation_study:
                 np.random.seed(self._seed)  # make it reproducible
                 indx = str(self._n_obs_act) + "_" + str(self._dim_x_act)
                 self._all_permutations.append(indx)
-                print(
-                    f"Generating dataset via given DGP with n = {str(self._n_obs_act)} and dim_x = {str(self._dim_x_act)}..."
-                )
                 self._prepare_data(indx)
-                print(f"Starting with simulation sessions:")
-                print("\n")
                 for lvl_lrn_dict in self.lrn_dict.keys():
                     self._lrn_act = lvl_lrn_dict
                     random_state = np.random.randint(np.iinfo(np.int32).max, size=self.n_rep)
                     self._model_cache = defaultdict(list)
                     cached = Parallel(n_jobs=self._nworkers, verbose=0, backend='loky')\
-                        (delayed(self._run_fit)(rs) for rs in tqdm.tqdm(
-                                random_state,
-                                bar_format="{l_bar}{bar:50}{r_bar}{bar:-50b}",
-                                ascii=False,
-                                desc=f"{lvl_lrn_dict}".ljust(20, "-")))
+                        (delayed(self._run_fit)(rs) for rs in random_state)
 
                     for d in cached: # you can list as many input dicts as you want here
                         for key, value in d.items():
@@ -398,86 +387,6 @@ class simulation_study:
                         "upCI"
                     ])
                     self._i_rep = 0
-                print("\n")
-
-    def histplot(self, show=False):
-        """
-        Plot histograms of the standardized bias for each learner and setting.
-        Parameters:
-        None
-        Returns:
-        None
-        """
-        for learner_i in self.lrn_dict.keys():
-            for key in self.model_attr["theta_dml"][learner_i].keys():
-                n, dim_x = key.split("_")
-                theta_0 = (
-                    self.theta_0[key]
-                    if self.is_heterogenous and self.alpha is None
-                    else self.theta_0
-                )
-                self.histograms[learner_i + "_" + key] = plt.figure(
-                    constrained_layout=True
-                )
-                ax = sns.histplot(
-                    (self.model_attr["theta_dml"][learner_i][key] - theta_0)
-                    / self.model_attr["se_dml"][learner_i][key],
-                    color=sns.color_palette("pastel")[2],
-                    edgecolor=sns.color_palette("dark")[2],
-                    stat="density",
-                    # bins=30,
-                    label="DML estimation",
-                )
-
-                ax.axvline(0.0, color="k")
-                ax.set_title(f"{learner_i} for $n_{{obs}}$={n}, $dim_x$={dim_x}")
-                xx = np.arange(-5, +5, 0.001)
-                yy = stats.norm.pdf(xx)
-                ax.plot(xx, yy, color="k", label="$\\mathcal{N}(0, 1)$")
-                ax.legend(loc="upper right", bbox_to_anchor=(1.2, 1.0))
-                ax.set_xlim([-6.0, 6.0])
-                ax.set_xlabel("$(\hat{\\theta}_0 - \\theta_0)/ SE$")
-                ax.set_ylabel("Density")
-        if show:
-            plt.figure()
-            for key in self.histograms.keys():
-                self.histograms[key].show()
-            plt.show()
-            plt.clf()
-
-    def boxplot(self, show=False):
-        """
-        Plot boxplots of the standardized bias for each learner and setting.
-        Parameters:
-        None
-        Returns:
-        None
-        """
-        t1 = {key: {} for key in self.lrn_dict.keys()}
-        t2 = {key: None for key in self.lrn_dict.keys()}
-        for learner_i in self.lrn_dict.keys():
-            for key in self.model_attr["theta_dml"][learner_i].keys():
-                n, dim_x = key.split("_")
-                theta_0 = (
-                    self.theta_0[key]
-                    if self.is_heterogenous and self.alpha is None
-                    else self.theta_0
-                )
-                t1[learner_i][f"$n_{{obs}}$={n}, $dim_x$={dim_x}"] = (
-                    self.model_attr["theta_dml"][learner_i][key] - theta_0
-                ) / self.model_attr["se_dml"][learner_i][key]
-            t2[learner_i] = pd.DataFrame.from_dict(t1[learner_i])
-            self.boxplots[learner_i] = plt.figure(constrained_layout=True)
-            ax = sns.boxplot(data=t2[learner_i], color=sns.color_palette("pastel")[2])
-            ax.set_title(learner_i)
-            ax.set_xlabel("Data setting")
-            ax.set_ylabel("$(\hat{\\theta}_0 - \\theta_0)/ SE$")
-        if show:
-            plt.figure()
-            for key in self.boxplots.keys():
-                self.boxplots[key].show()
-            plt.show()
-            plt.clf()
 
     def _absolute_bias(self, theta_dml_i, theta_0):
         """
@@ -707,12 +616,3 @@ class simulation_study:
         ).T
         attribute_df.to_excel(pth + "attributes.xlsx")
         self.performance_df.to_excel(pth + "performances.xlsx")
-        try:
-            os.makedirs(pth + "Histograms/")
-            os.makedirs(pth + "Boxplots/")
-        except FileExistsError:
-            pass
-        for label, fig in self.histograms.items():
-            fig.savefig(pth + f"Histograms/Histogram_{label}.png")
-        for label, fig in self.boxplots.items():
-            fig.savefig(pth + f"Boxplots/Boxplot_{label}.png")
