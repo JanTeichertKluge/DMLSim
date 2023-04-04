@@ -5,6 +5,6 @@ from .TransformerEnsemble import FineTuned_TransformerEnsemble, TransformerEnsem
 __all__ = [
     "CrossEmbeddings",
     "NeuralNetRegressorDoubleOut",
-    "FineTuned_TransformerEnsemble",,
-    "TransformerEnsemble_from_pretrained"
+    "FineTuned_TransformerEnsemble",
+    "TransformerEnsemble_from_pretrained",
 ]
