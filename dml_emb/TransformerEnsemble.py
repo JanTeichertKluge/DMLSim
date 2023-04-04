@@ -1,11 +1,8 @@
-import pandas as pd
-import numpy as np
-import pickle
-import torch 
+import torch
 from torch import nn
-from skorch.hf import HuggingfacePretrainedTokenizer
-from transformers import BeitImageProcessor, BeitForImageClassification, BeitModel
-from transformers import BertForSequenceClassification, BertModel
+from transformers import BeitForImageClassification
+from transformers import BertForSequenceClassification
+
 
 class FineTuned_TransformerEnsemble(nn.Module):
     """
@@ -38,31 +35,35 @@ class FineTuned_TransformerEnsemble(nn.Module):
                 logits (torch.Tensor): A tensor of output logits for classification, with shape (batch_size, num_labels).
                 features (torch.Tensor): A tensor of output features, with shape (batch_size, 128).
     """
+
     def __init__(self, image_model, text_model, num_labels):
         super().__init__()
-        self.image_model = image_model
-        self.text_model = text_model
+        self.image_model = BeitForImageClassification.from_pretrained(
+            image_model, num_labels=num_labels, ignore_mismatched_sizes=True
+        )
+        self.text_model = BertForSequenceClassification.from_pretrained(
+            text_model,
+            num_labels=num_labels,
+        )
         self.dropout = nn.Dropout(0.1)
         self.relu = nn.ReLU()
+        self.tanh = nn.Tanh()
         self.pre_classifier = nn.LazyLinear(768)
         self.feature_out = nn.LazyLinear(128)
         self.classifier = nn.LazyLinear(1)
 
     def forward(self, input_ids, attention_mask, features):
-        text_features = self.text_model.predict_features(input_ids)
-        image_features = self.image_model.predict_features(features)
+        text_features = self.text_model.bert(input_ids, attention_mask)
+        image_features = self.image_model.beit(features)
         output_text = text_features[1]
         output_image = image_features[1]
-        output_cat = torch.cat([output_text, 
-                                output_image], 
-                                dim=1)
+        output_cat = torch.cat([output_text, output_image], dim=1)
         output_cat = self.pre_classifier(output_cat)
         output_cat = self.relu(output_cat)
         pooled_output = self.dropout(output_cat)
         features = self.feature_out(pooled_output)
         logits = self.classifier(features)
         return logits, features
-
 
 
 class TransformerEnsemble_from_pretrained(nn.Module):
@@ -96,6 +97,7 @@ class TransformerEnsemble_from_pretrained(nn.Module):
                 logits (torch.Tensor): A tensor of output logits for classification, with shape (batch_size, num_labels).
                 features (torch.Tensor): A tensor of output features, with shape (batch_size, 128).
     """
+
     def __init__(self, image_model, text_model, num_labels):
         super().__init__()
         self.image_model = image_model
@@ -112,9 +114,7 @@ class TransformerEnsemble_from_pretrained(nn.Module):
             image_features = self.image_model(features)
         output_text = text_features[1]
         output_image = image_features[1]
-        output_cat = torch.cat([output_text, 
-                                output_image], 
-                                dim=1)
+        output_cat = torch.cat([output_text, output_image], dim=1)
         output_cat = self.pre_classifier(output_cat)
         output_cat = self.relu(output_cat)
         pooled_output = self.dropout(output_cat)

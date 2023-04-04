@@ -2,6 +2,7 @@ import numpy as np
 import torch
 from skorch import NeuralNetRegressor
 
+
 class NeuralNetRegressorDoubleOut(NeuralNetRegressor):
     """A neural network regressor class that supports multiple outputs.
 
@@ -69,9 +70,8 @@ class NeuralNetRegressorDoubleOut(NeuralNetRegressor):
             The loss function for the model.
         """
         if isinstance(y_pred, tuple):
-          logits, _ = y_pred
+            logits, _ = y_pred
         else:
-          logits = y_pred
+            logits = y_pred
         loss_reconstruction = super().get_loss(logits, y_true, *args, **kwargs)
         return loss_reconstruction
-
