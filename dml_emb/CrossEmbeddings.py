@@ -8,7 +8,7 @@ from sklearn.model_selection import KFold
 
 class CrossEmbeddings:
     """
-    A class for generating cross-modal embeddings via cross-fitting.
+    A class for generating multi-modal embeddings via cross-fitting.
 
     Attributes:
         dataset (pandas.DataFrame): the input dataset.
@@ -17,9 +17,9 @@ class CrossEmbeddings:
         d_col (str): the name of the treatment column in `dataset`.
         y_col (str): the name of the target column in `dataset`.
         n_folds (int): the number of folds for cross-validation.
-        aux_d (sklearn.base.BaseEstimator):
+        aux_d (class of dml_emb.FeatureRegressor):
                 the auxiliary model for the treatment.
-        aux_y (sklearn.base.BaseEstimator):
+        aux_y (class of dml_emb.FeatureRegressor):
                 the auxiliary model for the target.
         txt_str (str): the name of the HuggingFace
                        transformer for tokenizing text.

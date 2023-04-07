@@ -14,9 +14,10 @@ import multiprocessing
 from joblib import Parallel, delayed
 from collections import defaultdict
 
-class simulation_study:
+class simulation_study_mp:
     """
     Initialize a simulation study object.
+
     Arguments
     ----------
         model (:class:`DoubleML` object): A DoubleML model (DoubleMLPLR and DoubleMLIRM are supported).
@@ -286,7 +287,7 @@ class simulation_study:
         obj_dml_data :class:`DoubleMLData` object
         """
         (x, y, d) = self._data[self._i_rep]
-        if "neural_net" in self._lrn_act:
+        if "neural_net" in self._lrn_act: #typecheck?
             x = x.astype("float32")
             y = y.astype("float32")
             d = d.astype("float32")
@@ -318,9 +319,7 @@ class simulation_study:
             )
             else None
         )
-        """
-    Banane: Frage: Ist "clone" hier noch notwendig, oder kopiert doubleml die learner sowieso?
-    """
+
         model_kwargs = {
             "obj_dml_data": obj_dml_data,
             "ml_m": mlm,
@@ -370,7 +369,7 @@ class simulation_study:
                     cached = Parallel(n_jobs=self._nworkers, verbose=0, backend='loky')\
                         (delayed(self._run_fit)(rs) for rs in random_state)
 
-                    for d in cached: # you can list as many input dicts as you want here
+                    for d in cached:
                         for key, value in d.items():
                             self._model_cache[key].append(value)
 
