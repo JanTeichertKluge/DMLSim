@@ -1,7 +1,12 @@
 # DMLSim - Simulation studies for Double Machine Learning in Python
 
-The Python package **DMLSim** provides a simulation study framework using [DoubleML](https://github.com/DoubleML/doubleml-for-py)s Implementation of the double / debiased machine learning framework of
+The Python library **DMLSim** provides a simulation study framework using [DoubleML](https://github.com/DoubleML/doubleml-for-py)s Implementation of the double / debiased machine learning framework of
 [Chernozhukov et al. (2018)](https://doi.org/10.1111/ectj.12097).
+
+This library includes three packages:
+- dml_sim: 
+- dml_nn:
+- dml_emb:
 
 ## Main Features
 
@@ -55,9 +60,7 @@ pip install git+https://github.com/JanTeichertKluge/DMLSim.git
 ```
 
 ## Usage
-- [Find an example for PLR in Colab](https://colab.research.google.com/drive/1UT1cSmyz-c8ASKeLavoDv8yoe2wxwnaf?usp=sharing)
-- [Find an example for IRM in Colab](https://colab.research.google.com/drive/1LHdHTFZSDweR6jgA7EXoZ1l-vdzAcrj5?usp=sharing)
-
+add examples
 
 Example Code for DMLSim (IRM):
 ```python
