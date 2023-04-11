@@ -1,9 +1,9 @@
 # DMLSim - Library with packages on DoubleML and Neural Networks in Python
 
 This library includes three packages:
-- dml_sim: 
-- dml_nn:
-- dml_emb:
+- dml_sim
+- dml_nn
+- dml_emb
 
 The Python package **dml_sim** from the library **DMLSim** provides a simulation study framework using [DoubleML](https://github.com/DoubleML/doubleml-for-py)s Implementation of the double / debiased machine learning framework of
 [Chernozhukov et al. (2018)](https://doi.org/10.1111/ectj.12097).
