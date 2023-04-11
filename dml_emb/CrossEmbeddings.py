@@ -11,6 +11,7 @@ class CrossEmbeddings:
     A class for generating multi-modal embeddings via cross-fitting.
 
     Attributes:
+    -------
         dataset (pandas.DataFrame): the input dataset.
         text_col (str): the name of the text column in `dataset`.
         image_col (str): the name of the image column in `dataset`.
@@ -32,6 +33,7 @@ class CrossEmbeddings:
         emb (dict): the embeddings for each fold.
 
     Methods:
+    -------
         __init__(self, dataset, text_col, image_col,
                  d_col, y_col, n_folds, aux_d, aux_y, txt_str, img_str):
             Initializes the CrossEmbeddings class.

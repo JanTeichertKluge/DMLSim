@@ -3,16 +3,19 @@ from torch import nn
 from transformers import BeitForImageClassification
 from transformers import BertForSequenceClassification
 
+
 class FineTuned_TransformerEnsemble(nn.Module):
     """
     A PyTorch module that fine-tunes pre-trained image and text transformers and combines their outputs.
 
     Args:
-        image_model (transformers): An image transformer model from Huggingface transformers.
-        text_model (transformers): A text transformer model from the Huggingface transformers.
-        num_labels (int): The number of output labels for classification.
+    -------
+        image_model (str): An image transformer model name from Huggingface transformers.
+        text_model (str): A text transformer model name from the Huggingface transformers.
+        num_labels (int): The number of output labels for classification (num_labels = 1 for regression tasks).
 
     Attributes:
+    -------
         image_model (transformers): The pre-trained image transformer model.
         text_model (transformers): The pre-trained text transformer model.
         dropout (nn.Dropout): A dropout layer with a rate of 0.1.
@@ -22,6 +25,7 @@ class FineTuned_TransformerEnsemble(nn.Module):
         classifier (nn.LazyLinear): A fully connected layer with output size 1.
 
     Methods:
+    -------
         forward(input_ids, attention_mask, features):
             Feeds the input through the image and text models and combines their outputs.
 
@@ -53,8 +57,8 @@ class FineTuned_TransformerEnsemble(nn.Module):
     def forward(self, input_ids, attention_mask, features):
         text_features = self.text_model.bert(input_ids, attention_mask)
         image_features = self.image_model.beit(features)
-        output_text = text_features[1] #pooler_output
-        output_image = image_features[1] #pooler_output
+        output_text = text_features[1]  # pooler_output
+        output_image = image_features[1]  # pooler_output
         output_cat = torch.cat([output_text, output_image], dim=1)
         output_cat = self.pre_classifier(output_cat)
         output_cat = self.relu(output_cat)
@@ -66,14 +70,16 @@ class FineTuned_TransformerEnsemble(nn.Module):
 
 class TransformerEnsemble_from_pretrained(nn.Module):
     """
-    A PyTorch module that use already fine-tuned pre-trained image and text transformers and combines their outputs.
+    A PyTorch module that uses already fine-tuned and pre-trained
+    image and text transformers and combines their outputs.
 
     Args:
-        image_model (transformers): An image transformer model from Huggingface transformers.
-        text_model (transformers): A text transformer model from Huggingface transformers.
-        num_labels (int): The number of output labels for classification.
+    -------
+        image_model (transformers): The pre-trained and fine-tuned image transformer model.
+        text_model (transformers): The pre-trained and fine-tuned text transformer model.
 
     Attributes:
+    -------
         image_model (transformers): The pre-trained and fine-tuned image transformer model.
         text_model (transformers): The pre-trained and fine-tuned text transformer model.
         dropout (nn.Dropout): A dropout layer with a rate of 0.1.
@@ -83,6 +89,7 @@ class TransformerEnsemble_from_pretrained(nn.Module):
         classifier (nn.LazyLinear): A fully connected layer with output size 1.
 
     Methods:
+    -------
         forward(input_ids, attention_mask, features):
             Feeds the input through the image and text models and combines their outputs.
 
@@ -96,7 +103,7 @@ class TransformerEnsemble_from_pretrained(nn.Module):
                 features (torch.Tensor): A tensor of output features, with shape (batch_size, 128).
     """
 
-    def __init__(self, image_model, text_model, num_labels):
+    def __init__(self, image_model, text_model):
         super().__init__()
         self.image_model = image_model
         self.text_model = text_model
