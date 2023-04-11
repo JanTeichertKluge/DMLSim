@@ -1,9 +1,6 @@
 import numpy as np
 import pandas as pd
-from scipy.linalg import toeplitz
-from sklearn.preprocessing import PolynomialFeatures, OneHotEncoder
-from sklearn.datasets import make_spd_matrix
-from doubleml import DoubleMLData, DoubleMLClusterData
+from doubleml import DoubleMLData
 from scipy.special import expit
 
 # for make_irm_farell2021
