@@ -1,14 +1,15 @@
-from setuptools import find_packages, setup
+from setuptools import setup
 setup(
     name='DMLSim',
     packages=['dml_sim', 'dml_nn', 'dml_emb'],
-    #py_modules=['datasets', 'doubleml_skorch_api', 'simulation_base_class'],
     version='0.2.1',
     description='package to run DoubleML simulation studies and use Neural Networks approaches.',
     author=['Sundermann, Moritz <moritz.sundermann@studium.uni-hamburg.de>', 
             'Teichert-Kluge, Jan <jan.teichert-kluge@studium.uni-hamburg.de>'],
     install_requires=['DoubleML',
+                      'joblib',
                       'matplotlib',
+                      'multiprocessing',
                       'numpy',
                       'openpyxl',
                       'pandas',
@@ -20,6 +21,7 @@ setup(
                       'skorch',
                       'statsmodels',
                       'torch',
-                      'tqdm'],
+                      'tqdm',
+                      'transformers'],
      license='MIT'
 )
