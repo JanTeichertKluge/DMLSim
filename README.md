@@ -185,20 +185,23 @@ emb_ar = ce.get_embeddings()
 
 ## Installation
 
-**DMLSim** requires
-
-- Python
-- sklearn
-- numpy
-- scipy
-- pandas
-- statsmodels
-- joblib
+**DMLSim** requires Python 3 with the following packages:
 - DoubleML
+- joblib
 - matplotlib
+- numpy
+- openpyxl
+- pandas
+- Pillow
+- python- dateutil
+- scikit- learn
+- scipy==1.7.3
 - seaborn
+- skorch
+- statsmodels
+- torch
 - tqdm
-- etc.
+- transformers
 
 To install DMLSim use
 
