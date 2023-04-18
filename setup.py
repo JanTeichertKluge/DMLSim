@@ -9,7 +9,6 @@ setup(
     install_requires=['DoubleML',
                       'joblib',
                       'matplotlib',
-                      'multiprocessing',
                       'numpy',
                       'openpyxl',
                       'pandas',
