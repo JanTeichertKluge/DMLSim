@@ -15,7 +15,7 @@ setup(
                       'Pillow',
                       'python-dateutil',
                       'scikit-learn',
-                      'scipy==1.7.3',
+                      'scipy=1.7.3',
                       'seaborn',
                       'skorch',
                       'statsmodels',
